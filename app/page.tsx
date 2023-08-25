@@ -1,95 +1,69 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
+
+import {
+  AppBar,
+  Button,
+  Container,
+  Paper,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { useRef, useState } from "react";
+import { combineAction } from "./combine-action";
 
 export default function Home() {
+  // Hooks
+  const [inputNotes, setInputNotes] = useState("");
+  const [aggregateNotes, setAggregateNotes] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const inputElement = useRef<HTMLInputElement>(null);
+
+  // Event Handlers
+  async function handleClick_submit() {
+    setLoading(true);
+    const newNotes = await combineAction(inputNotes, aggregateNotes);
+    setLoading(false);
+
+    setAggregateNotes(newNotes);
+    setInputNotes("");
+    inputElement.current?.focus();
+  }
+
+  // Rendering
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+    <>
+      <AppBar sx={{ padding: 0.5 }} position="static">
+        <Typography variant="h6">Mindmess</Typography>
+      </AppBar>
+      <Container maxWidth="lg" sx={{ marginTop: 2 }}>
+        <Typography variant="body2">
+          Start by adding your notes below
+        </Typography>
+        <TextField
+          fullWidth
+          id="outlined-basic"
+          label="Input Notes"
+          margin="normal"
+          multiline
+          onChange={(e) => setInputNotes(e.target.value)}
+          ref={inputElement}
+          value={inputNotes}
+          variant="outlined"
         />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
+        <Button
+          disabled={loading || !inputNotes}
+          onClick={handleClick_submit}
+          variant="outlined"
         >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+          {loading ? "Working... " : "Submit"}
+        </Button>
+        {aggregateNotes && (
+          <Paper sx={{ marginTop: 1, padding: 1 }}>
+            <Typography variant="body2">{aggregateNotes}</Typography>
+          </Paper>
+        )}
+      </Container>
+    </>
+  );
 }
