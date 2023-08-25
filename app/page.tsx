@@ -8,8 +8,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useRef, useState } from "react";
-import { combineAction } from "./combine-action";
+import parse from "html-react-parser";
+import { micromark } from "micromark";
+import { useMemo, useRef, useState } from "react";
+import { processAction } from "./process-action";
 
 export default function Home() {
   // Hooks
@@ -19,13 +21,23 @@ export default function Home() {
 
   const inputElement = useRef<HTMLInputElement>(null);
 
+  const aggregateNotesJsx = useMemo(
+    () => parse(micromark(aggregateNotes)),
+    [aggregateNotes]
+  );
+
   // Event Handlers
   async function handleClick_submit() {
     setLoading(true);
-    const newNotes = await combineAction(inputNotes, aggregateNotes);
+    const response = await processAction(inputNotes, aggregateNotes);
     setLoading(false);
 
-    setAggregateNotes(newNotes);
+    if (response.error) {
+      alert(response.error);
+      return;
+    }
+
+    setAggregateNotes(response.newNote);
     setInputNotes("");
     inputElement.current?.focus();
   }
@@ -60,7 +72,7 @@ export default function Home() {
         </Button>
         {aggregateNotes && (
           <Paper sx={{ marginTop: 1, padding: 1 }}>
-            <Typography variant="body2">{aggregateNotes}</Typography>
+            <Typography variant="body2">{aggregateNotesJsx}</Typography>
           </Paper>
         )}
       </Container>

@@ -1,20 +1,17 @@
+commit
 
-commit to git
+side by side UI
 
-send input to open ai
+add ability to edit output note
 
-send result to server
+ability to 'go back' to prev note
 
-combine input and result
+accept/reject buttons - keep input there until accepted
 
-show markdown
+show diff new note
 
-show diff when there's no output
-
+maybe dont show markdown, just show the pre text
 
 dark mode
-
-commit to github
-deploy vercel?
 
 
