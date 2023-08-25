@@ -3,6 +3,7 @@
 import {
   AppBar,
   Button,
+  ClickAwayListener,
   Grid,
   Paper,
   Stack,
@@ -21,12 +22,16 @@ export default function Home() {
   const [currentNote, setCurrentNote] = useState("");
   const [stagedNote, setStagedNote] = useState("");
   const [loading, setLoading] = useState(false);
-  const [focus, setFocus] = useState<"input" | "accept" | "none">("input");
+  const [focus, setFocus] = useState<"accept" | "input" | "none" | "output">(
+    "input"
+  );
+  const [editOuput, setEditOutput] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const outputRef = useRef<HTMLInputElement>(null);
   const acceptButtonRef = useRef<HTMLButtonElement>(null);
 
-  const aggregateNotesJsx = useMemo(
+  const currentNoteJsx = useMemo(
     () => parse(micromark(currentNote)),
     [currentNote]
   );
@@ -34,13 +39,21 @@ export default function Home() {
   useEffect(() => {
     if (focus === "input") {
       inputRef.current?.focus();
-    }
-    if (focus === "accept") {
+    } else if (focus === "output") {
+      outputRef.current?.focus();
+    } else if (focus === "accept") {
       acceptButtonRef.current?.focus();
     }
   }, [focus]);
 
   // Event Handlers
+  function handleKeyDown_input(e: React.KeyboardEvent) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleClick_submit();
+    }
+  }
+
   async function handleClick_submit() {
     setLoading(true);
     setFocus("none");
@@ -74,6 +87,11 @@ export default function Home() {
     setFocus("input");
   }
 
+  function handleClick_currentNote() {
+    setEditOutput(true);
+    setFocus("output");
+  }
+
   // Rendering
   return (
     <>
@@ -82,21 +100,17 @@ export default function Home() {
       </AppBar>
       <Grid container sx={{ marginTop: 2 }}>
         <Grid item sx={{ padding: 1 }} xs={5}>
+          {/* Input Section */}
           <Typography variant="body2">Input:</Typography>
           <TextField
             disabled={loading || Boolean(stagedNote)}
             fullWidth
-            id="outlined-basic"
+            id="input-textfield"
             inputRef={inputRef}
             margin="normal"
             multiline
             onChange={(e) => setInputNote(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleClick_submit();
-              }
-            }}
+            onKeyDown={handleKeyDown_input}
             size="small"
             value={inputNote}
             variant="outlined"
@@ -108,6 +122,8 @@ export default function Home() {
           >
             {loading ? "Working... " : "Submit"}
           </Button>
+
+          {/* Accept/Reject Section */}
           {stagedNote && (
             <Stack direction="row" spacing={1} sx={{ marginTop: 1 }}>
               <Button
@@ -129,6 +145,7 @@ export default function Home() {
           )}
         </Grid>
         <Grid item sx={{ padding: 1 }} xs={7}>
+          {/* Output Section */}
           <Typography variant="body2">Output:</Typography>
           <Paper sx={{ marginTop: 2, minHeight: 22, padding: 1 }}>
             {stagedNote ? (
@@ -144,11 +161,29 @@ export default function Home() {
                   },
                 }}
               />
+            ) : editOuput ? (
+              <ClickAwayListener
+                onClickAway={() => setEditOutput(false)}
+                mouseEvent="onMouseDown"
+              >
+                <TextField
+                  disabled={loading || Boolean(stagedNote)}
+                  fullWidth
+                  id="output-textfield"
+                  inputRef={outputRef}
+                  margin="normal"
+                  multiline
+                  onChange={(e) => setCurrentNote(e.target.value)}
+                  size="small"
+                  value={currentNote}
+                  variant="outlined"
+                />
+              </ClickAwayListener>
             ) : (
-              currentNote && (
-                <Typography variant="body2">{aggregateNotesJsx}</Typography>
-              )
-            )}{" "}
+              <Typography onClick={handleClick_currentNote} variant="body2">
+                {currentNoteJsx}
+              </Typography>
+            )}
           </Paper>
         </Grid>
       </Grid>
