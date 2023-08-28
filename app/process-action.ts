@@ -6,9 +6,10 @@ const openai = new OpenAI({
   apiKey: process.env["OPENAI_API_KEY"],
 });
 
-const systemMessage = `Combine the 'input' note with the 'exiting' note to create a combined note output.
-Don't print out any header in the output.
-Ensure the combined note is organized well into nested bullet points, and duplication is minimized.`;
+const systemMessage = `Combine the 'Existing Notes' with the 'Input Notes' to create a Combined Note. 
+Deduplicate and reorganize notes if possible to improve the overall understanding.
+Organize the notes in a tree using the tab character for nesting.
+Give a summary of changes at the bottom prefixed with **.`;
 
 export async function processAction(note: string, existingNotes: string) {
   let result = {
@@ -17,13 +18,15 @@ export async function processAction(note: string, existingNotes: string) {
   };
 
   try {
-    const userMsg = `Input Note: ${note}\nExisting Notes: ${existingNotes}`;
+    const userMsg1 = `Existing Notes:\n${existingNotes}`;
+    const userMsg2 = `Input Notes:\n${note}`;
 
     const chatCompletion = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         { role: "system", content: systemMessage },
-        { role: "user", content: userMsg },
+        { role: "user", content: userMsg1 },
+        { role: "user", content: userMsg2 },
       ],
     });
 
@@ -34,7 +37,7 @@ export async function processAction(note: string, existingNotes: string) {
       result.error = "Error: No result";
     }
     else {
-      result.newNote = content.replace(/combined note:/i, "");
+      result.newNote = content.replace(/combined note(s)?( output)?:(\n)?/i, "");
     }
 
   } catch (e) {
