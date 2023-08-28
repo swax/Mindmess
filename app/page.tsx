@@ -2,62 +2,75 @@
 
 import {
   AppBar,
+  Box,
   Button,
-  ClickAwayListener,
   Grid,
-  Paper,
   Stack,
+  Tab,
+  Tabs,
   TextField,
   Typography,
 } from "@mui/material";
-import parse from "html-react-parser";
-import { micromark } from "micromark";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactDiffViewer from "react-diff-viewer-continued";
+import { useLocalStorage } from "react-use";
 import { processAction } from "./process-action";
 
 export default function Home() {
   // Hooks
   const [inputNote, setInputNote] = useState("");
-  const [currentNote, setCurrentNote] = useState("");
+  const [currentNote, setCurrentNote] = useLocalStorage("currentNote", "");
   const [stagedNote, setStagedNote] = useState("");
   const [loading, setLoading] = useState(false);
-  const [focus, setFocus] = useState<"accept" | "input" | "none" | "output">(
-    "input"
+  const [focus, setFocus] = useState<"accept" | "input" | "none">("input");
+  const [outputTab, setOutputTab] = useState<"current" | "staging" | "diff">(
+    "current"
   );
-  const [editOuput, setEditOutput] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
-  const outputRef = useRef<HTMLInputElement>(null);
   const acceptButtonRef = useRef<HTMLButtonElement>(null);
-
-  const currentNoteJsx = useMemo(
-    () => parse(micromark(currentNote)),
-    [currentNote]
-  );
 
   useEffect(() => {
     if (focus === "input") {
       inputRef.current?.focus();
-    } else if (focus === "output") {
-      outputRef.current?.focus();
     } else if (focus === "accept") {
       acceptButtonRef.current?.focus();
     }
   }, [focus]);
 
   // Event Handlers
-  function handleKeyDown_input(e: React.KeyboardEvent) {
-    if (e.key === "Enter" && !e.shiftKey) {
+  function handleKeyDown_input(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Tab" && e.currentTarget) {
+      e.preventDefault();
+      tabInput(e.currentTarget);
+    } else if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleClick_submit();
     }
   }
 
+  function handleKeyDown_output(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Tab" && e.currentTarget) {
+      e.preventDefault();
+      tabInput(e.currentTarget);
+    }
+  }
+
+  function tabInput(input: HTMLInputElement) {
+    const start = input.selectionStart || 0;
+    const end = input.selectionEnd || 0;
+
+    // unfortunately breaks undo
+    input.value =
+      input.value.substring(0, start) + "\t" + input.value.substring(end);
+
+    input.selectionStart = input.selectionEnd = start + 1;
+  }
+
   async function handleClick_submit() {
     setLoading(true);
     setFocus("none");
-    const response = await processAction(inputNote, currentNote);
+    const response = await processAction(inputNote, currentNote || "");
     setLoading(false);
 
     if (response.error) {
@@ -65,31 +78,24 @@ export default function Home() {
       return;
     }
 
-    if (response.newNote === currentNote || !currentNote) {
-      setCurrentNote(response.newNote);
-      setInputNote("");
-      setFocus("input");
-    } else {
-      setStagedNote(response.newNote);
-      setFocus("accept");
-    }
+    setStagedNote(response.newNote);
+    setFocus("accept");
+    setOutputTab("staging");
   }
 
   function handleClick_accept() {
-    setCurrentNote(stagedNote);
+    const acceptedNote = stagedNote.replace(/\*\*/g, ""); // ** denotes changes
+    setCurrentNote(acceptedNote);
     setStagedNote("");
     setInputNote("");
     setFocus("input");
+    setOutputTab("current");
   }
 
   function handleClick_reject() {
     setStagedNote("");
     setFocus("input");
-  }
-
-  function handleClick_currentNote() {
-    setEditOutput(true);
-    setFocus("output");
+    setOutputTab("current");
   }
 
   // Rendering
@@ -98,20 +104,27 @@ export default function Home() {
       <AppBar sx={{ padding: 0.5 }} position="static">
         <Typography variant="h6">Mindmess</Typography>
       </AppBar>
-      <Grid container sx={{ marginTop: 2 }}>
+      <Grid container>
         <Grid item sx={{ padding: 1 }} xs={5}>
           {/* Input Section */}
-          <Typography variant="body2">Input:</Typography>
+          <Tabs value="input">
+            <Tab value="input" label="Input" />
+          </Tabs>
           <TextField
             disabled={loading || Boolean(stagedNote)}
             fullWidth
             id="input-textfield"
+            inputProps={{
+              onKeyDown: handleKeyDown_input,
+              style: { fontFamily: "Calibri", fontSize: 14, lineHeight: 1.3 },
+            }}
             inputRef={inputRef}
             margin="normal"
+            minRows={3}
             multiline
             onChange={(e) => setInputNote(e.target.value)}
-            onKeyDown={handleKeyDown_input}
             size="small"
+            sx={{ backgroundColor: "white" }}
             value={inputNote}
             variant="outlined"
           />
@@ -120,71 +133,78 @@ export default function Home() {
             onClick={handleClick_submit}
             variant="outlined"
           >
-            {loading ? "Working... " : "Submit"}
+            {loading ? "Working... " : "Combine"}
           </Button>
-
-          {/* Accept/Reject Section */}
-          {stagedNote && (
-            <Stack direction="row" spacing={1} sx={{ marginTop: 1 }}>
-              <Button
-                color="success"
-                onClick={handleClick_accept}
-                ref={acceptButtonRef}
-                variant="outlined"
-              >
-                Accept
-              </Button>
-              <Button
-                color="error"
-                onClick={handleClick_reject}
-                variant="outlined"
-              >
-                Reject
-              </Button>
-            </Stack>
-          )}
         </Grid>
         <Grid item sx={{ padding: 1 }} xs={7}>
           {/* Output Section */}
-          <Typography variant="body2">Output:</Typography>
-          <Paper sx={{ marginTop: 2, minHeight: 22, padding: 1 }}>
-            {stagedNote ? (
-              <ReactDiffViewer
-                showDiffOnly={false}
-                hideLineNumbers
-                newValue={stagedNote}
-                oldValue={currentNote}
-                splitView={false}
-                styles={{
-                  contentText: {
-                    fontSize: 12,
-                  },
-                }}
-              />
-            ) : editOuput ? (
-              <ClickAwayListener
-                onClickAway={() => setEditOutput(false)}
-                mouseEvent="onMouseDown"
-              >
-                <TextField
-                  disabled={loading || Boolean(stagedNote)}
-                  fullWidth
-                  id="output-textfield"
-                  inputRef={outputRef}
-                  margin="normal"
-                  multiline
-                  onChange={(e) => setCurrentNote(e.target.value)}
-                  size="small"
-                  value={currentNote}
-                  variant="outlined"
-                />
-              </ClickAwayListener>
-            ) : (
-              <Typography onClick={handleClick_currentNote} variant="body2">
-                {currentNoteJsx}
-              </Typography>
+          <Stack direction="row" spacing={1}>
+            <Tabs value={outputTab} onChange={(e, v) => setOutputTab(v)}>
+              <Tab value="current" label="Output" />
+              {stagedNote && <Tab value="staging" label="Staging" />}
+              {stagedNote && <Tab value="diff" label="Diff" />}
+            </Tabs>
+            <Box sx={{ flexGrow: 1 }} />
+            {/* Accept/Reject Section */}
+            {stagedNote && (
+              <>
+                <Stack direction="row" spacing={1}>
+                  <Button
+                    color="success"
+                    onClick={handleClick_accept}
+                    ref={acceptButtonRef}
+                    variant="outlined"
+                  >
+                    Accept
+                  </Button>
+                  <Button
+                    color="error"
+                    onClick={handleClick_reject}
+                    variant="outlined"
+                  >
+                    Reject
+                  </Button>
+                </Stack>
+              </>
             )}
-          </Paper>
+          </Stack>
+          {outputTab != "diff" && (
+            <TextField
+              disabled={loading}
+              fullWidth
+              id="output-textfield"
+              inputProps={{
+                onKeyDown: handleKeyDown_output,
+                style: { fontFamily: "Calibri", fontSize: 14, lineHeight: 1.3 },
+              }}
+              margin="normal"
+              multiline
+              onChange={(e) =>
+                (outputTab == "current" ? setCurrentNote : setStagedNote)(
+                  e.target.value
+                )
+              }
+              size="small"
+              sx={{ backgroundColor: "white" }}
+              value={outputTab == "current" ? currentNote : stagedNote}
+              variant="outlined"
+            />
+          )}
+          {outputTab == "diff" && (
+            <ReactDiffViewer
+              disableWordDiff={true}
+              showDiffOnly={false}
+              hideLineNumbers
+              newValue={stagedNote}
+              oldValue={currentNote}
+              splitView={false}
+              styles={{
+                contentText: {
+                  fontSize: 12,
+                },
+              }}
+            />
+          )}
         </Grid>
       </Grid>
     </>
