@@ -10,36 +10,43 @@ const openai = new OpenAI({
   apiKey: process.env["OPENAI_API_KEY"],
 });
 
-const systemMessage = `Combine the 'Existing Notes' with the 'Input Notes' to create an 'Output Note'. 
-Deduplicate and reorganize notes if possible to improve the overall understanding.
-Organize the notes in a tree using the tab character for nesting.
-Give a summary of changes at the bottom prefixed with **.`;
+const systemMessage = `Run the following question on the 'Existing Notes'.`;
 
-export async function mergeAction(
-  note: string,
-  existingNotes: string
+export async function questionAction(
+  question: string,
+  existingNotes: string,
+  messageLog: OpenAI.Chat.Completions.ChatCompletionMessage[]
 ): Promise<InputActionResponse> {
   let result = initInputActionResponse();
 
   try {
     const noteMsg = `Existing Notes:\n${existingNotes}`;
-    const inputMsg = `Input Notes:\n${note}`;
+
+    const questionAnswer: OpenAI.Chat.Completions.ChatCompletionMessage[] = [
+      { role: "user", content: question },
+    ];
 
     const chatCompletion = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         { role: "system", content: systemMessage },
         { role: "user", content: noteMsg },
-        { role: "user", content: inputMsg },
+        ...messageLog,
+        ...questionAnswer,
       ],
     });
 
-    const newNote = chatCompletion.choices[0].message.content;
+    const answer = chatCompletion.choices[0].message.content;
 
-    if (!newNote) {
+    if (!answer) {
       result.error = "Error: No result";
     } else {
-      result.newNote = newNote.replace(/output note(s)?:(\n)?/i, "");
+      questionAnswer.push({
+        role: "assistant",
+        content: answer,
+      });
+
+      result.chatLog = questionAnswer;
     }
   } catch (e) {
     result.error = "" + e;

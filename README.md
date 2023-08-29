@@ -2,10 +2,6 @@ A GPT powered note 'building' app
 
 ### Todo 
 
-- Cancel request
-
-- Question support
-
 - Make right side a sticky side bar
 
 - Left side sticky side bar for managing multiple notes (db, essay, recipe, etc..)
@@ -17,4 +13,3 @@ A GPT powered note 'building' app
 - Test with running open ai client side
     - App as SSG on cloudflare
     - User enters their own api key
-
