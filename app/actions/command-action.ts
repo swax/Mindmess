@@ -1,7 +1,10 @@
 "use server";
 
 import OpenAI from "openai";
-import { MergeCommandResponse } from "./MergeCommandResponse";
+import {
+  InputActionResponse,
+  initInputActionResponse,
+} from "./InputActionResponse";
 
 const openai = new OpenAI({
   apiKey: process.env["OPENAI_API_KEY"],
@@ -13,31 +16,28 @@ Give a summary of changes at the bottom prefixed with **.`;
 export async function commandAction(
   command: string,
   existingNotes: string
-): Promise<MergeCommandResponse> {
-  let result = {
-    newNote: "",
-    error: "",
-  };
+): Promise<InputActionResponse> {
+  let result = initInputActionResponse();
 
   try {
-    const userMsg1 = `Existing Notes:\n${existingNotes}`;
-    const userMsg2 = `Command:\n${command}`;
+    const noteMsg = `Existing Notes:\n${existingNotes}`;
+    const commandMsg = `Command:\n${command}`;
 
     const chatCompletion = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         { role: "system", content: systemMessage },
-        { role: "user", content: userMsg1 },
-        { role: "user", content: userMsg2 },
+        { role: "user", content: noteMsg },
+        { role: "user", content: commandMsg },
       ],
     });
 
-    const content = chatCompletion.choices[0].message.content;
+    const newNote = chatCompletion.choices[0].message.content;
 
-    if (!content) {
+    if (!newNote) {
       result.error = "Error: No result";
     } else {
-      result.newNote = content.replace(/output note(s)?:(\n)?/i, "");
+      result.newNote = newNote.replace(/output note(s)?:(\n)?/i, "");
     }
   } catch (e) {
     result.error = "" + e;

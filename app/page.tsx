@@ -1,28 +1,36 @@
 "use client";
 
+import PersonIcon from "@mui/icons-material/Person";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
 import {
   AppBar,
   Box,
   Button,
   Grid,
   LinearProgress,
+  Paper,
   Stack,
   Tab,
+  Table,
+  TableCell,
+  TableRow,
   Tabs,
-  TextField,
   Typography,
 } from "@mui/material";
+import OpenAI from "openai";
 import { useEffect, useRef, useState } from "react";
 import ReactDiffViewer from "react-diff-viewer-continued";
 import { useLocalStorage } from "react-use";
-import { mergeAction } from "./actions/merge-action";
-import BaseTextField from "./components/BaseTextField";
 import { commandAction } from "./actions/command-action";
+import { mergeAction } from "./actions/merge-action";
+import { questionAction } from "./actions/question-action";
+import BaseTextField from "./components/BaseTextField";
 
 export default function Home() {
   // Hooks
-  const [inputNote, setInputNote] = useState("");
   const [currentNote, setCurrentNote] = useLocalStorage("currentNote", "");
+
+  const [input, setInput] = useState("");
   const [stagedNote, setStagedNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [focus, setFocus] = useState<"accept" | "input" | "none">("input");
@@ -33,6 +41,11 @@ export default function Home() {
     "merge"
   );
 
+  const [chatLog, setChatLog] = useState<
+    OpenAI.Chat.Completions.ChatCompletionMessage[]
+  >([]);
+
+  const runNumber = useRef(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const acceptButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -77,12 +90,21 @@ export default function Home() {
     setLoading(true);
     setFocus("none");
 
+    const runNumberCheck = runNumber.current;
+
     const response =
       inputTab == "merge"
-        ? await mergeAction(inputNote, currentNote || "")
+        ? await mergeAction(input, currentNote || "")
         : inputTab == "command"
-        ? await commandAction(inputNote, currentNote || "")
-        : { newNote: "", error: "Invalid tab selected" };
+        ? await commandAction(input, currentNote || "")
+        : inputTab == "question"
+        ? await questionAction(input, currentNote || "", chatLog)
+        : undefined;
+
+    // Check if this run was cancelled
+    if (!response || runNumberCheck != runNumber.current) {
+      return;
+    }
 
     setLoading(false);
 
@@ -91,16 +113,28 @@ export default function Home() {
       return;
     }
 
-    setStagedNote(response.newNote);
-    setFocus("accept");
-    setOutputTab("staging");
+    if (inputTab == "question") {
+      setChatLog([...chatLog, ...response.chatLog]);
+      setInput("");
+      setFocus("input");
+    } else {
+      setStagedNote(response.newNote);
+      setFocus("accept");
+      setOutputTab("staging");
+    }
+  }
+
+  function handleClick_cancelRunInput() {
+    setLoading(false);
+    setFocus("input");
+    runNumber.current++;
   }
 
   function handleClick_accept() {
     const acceptedNote = stagedNote.replace(/\*\*/g, ""); // ** denotes changes
     setCurrentNote(acceptedNote);
     setStagedNote("");
-    setInputNote("");
+    setInput("");
     setFocus("input");
     setOutputTab("current");
   }
@@ -114,7 +148,7 @@ export default function Home() {
   // Rendering
   return (
     <>
-      <AppBar sx={{ padding: 0.5 }} position="static">
+      <AppBar sx={{ padding: 0.5, paddingLeft: 1.5 }} position="static">
         <Typography variant="h6">Mindmess</Typography>
       </AppBar>
       {loading && <LinearProgress />}
@@ -188,6 +222,37 @@ export default function Home() {
             <Tab value="command" label="Command" />
             <Tab value="question" label="Question" />
           </Tabs>
+          {inputTab == "question" && (
+            <Paper>
+              <Table sx={{ marginTop: 1 }}>
+                {chatLog.map((message, i) => (
+                  <TableRow key={i}>
+                    <TableCell sx={{ width: 24, verticalAlign: "top" }}>
+                      {message.role == "assistant" ? (
+                        <SmartToyIcon />
+                      ) : (
+                        <PersonIcon />
+                      )}
+                    </TableCell>
+                    <TableCell sx={{ sverticalAlign: "top" }}>
+                      <pre
+                        style={{
+                          fontFamily: "Calibri",
+                          fontSize: 14,
+                          lineHeight: 1.3,
+                          margin: 0,
+                          whiteSpace: "pre-wrap",
+                        }}
+                      >
+                        {message.content}
+                      </pre>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </Table>
+            </Paper>
+          )}
+
           <BaseTextField
             disabled={loading || Boolean(stagedNote)}
             inputProps={{
@@ -195,19 +260,34 @@ export default function Home() {
             }}
             inputRef={inputRef}
             minRows={3}
-            onChange={(e) => setInputNote(e.target.value)}
-            value={inputNote}
+            onChange={(e) => setInput(e.target.value)}
+            value={input}
           />
-          <Button
-            disabled={loading || !inputNote || Boolean(stagedNote)}
-            onClick={handleClick_runInput}
-            variant="outlined"
-          >
-            {loading ? "Working... " : "Run"}
-          </Button>
+          <Stack direction="row" spacing={1}>
+            <Button
+              disabled={loading || !input || Boolean(stagedNote)}
+              onClick={handleClick_runInput}
+              variant="outlined"
+            >
+              {loading ? "Working... " : "Run"}
+            </Button>
+            {loading && (
+              <Button
+                color="error"
+                onClick={handleClick_cancelRunInput}
+                variant="outlined"
+              >
+                Cancel
+              </Button>
+            )}
+            {!loading && inputTab == "question" && chatLog.length > 0 && (
+              <Button onClick={() => setChatLog([])} variant="outlined">
+                Clear Chat
+              </Button>
+            )}
+          </Stack>
         </Grid>
       </Grid>
     </>
   );
 }
-
