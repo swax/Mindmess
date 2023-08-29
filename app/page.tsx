@@ -5,6 +5,7 @@ import {
   Box,
   Button,
   Grid,
+  LinearProgress,
   Stack,
   Tab,
   Tabs,
@@ -14,7 +15,9 @@ import {
 import { useEffect, useRef, useState } from "react";
 import ReactDiffViewer from "react-diff-viewer-continued";
 import { useLocalStorage } from "react-use";
-import { processAction } from "./process-action";
+import { mergeAction } from "./actions/merge-action";
+import BaseTextField from "./components/BaseTextField";
+import { commandAction } from "./actions/command-action";
 
 export default function Home() {
   // Hooks
@@ -25,6 +28,9 @@ export default function Home() {
   const [focus, setFocus] = useState<"accept" | "input" | "none">("input");
   const [outputTab, setOutputTab] = useState<"current" | "staging" | "diff">(
     "current"
+  );
+  const [inputTab, setInputTab] = useState<"merge" | "command" | "question">(
+    "merge"
   );
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -40,17 +46,17 @@ export default function Home() {
 
   // Event Handlers
   function handleKeyDown_input(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Tab" && e.currentTarget) {
+    if (e.key === "Tab" && e.shiftKey) {
       e.preventDefault();
       tabInput(e.currentTarget);
     } else if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleClick_submit();
+      handleClick_runInput();
     }
   }
 
   function handleKeyDown_output(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Tab" && e.currentTarget) {
+    if (e.key === "Tab") {
       e.preventDefault();
       tabInput(e.currentTarget);
     }
@@ -67,10 +73,17 @@ export default function Home() {
     input.selectionStart = input.selectionEnd = start + 1;
   }
 
-  async function handleClick_submit() {
+  async function handleClick_runInput() {
     setLoading(true);
     setFocus("none");
-    const response = await processAction(inputNote, currentNote || "");
+
+    const response =
+      inputTab == "merge"
+        ? await mergeAction(inputNote, currentNote || "")
+        : inputTab == "command"
+        ? await commandAction(inputNote, currentNote || "")
+        : { newNote: "", error: "Invalid tab selected" };
+
     setLoading(false);
 
     if (response.error) {
@@ -104,43 +117,13 @@ export default function Home() {
       <AppBar sx={{ padding: 0.5 }} position="static">
         <Typography variant="h6">Mindmess</Typography>
       </AppBar>
+      {loading && <LinearProgress />}
       <Grid container>
-        <Grid item sx={{ padding: 1 }} xs={5}>
-          {/* Input Section */}
-          <Tabs value="input">
-            <Tab value="input" label="Input" />
-          </Tabs>
-          <TextField
-            disabled={loading || Boolean(stagedNote)}
-            fullWidth
-            id="input-textfield"
-            inputProps={{
-              onKeyDown: handleKeyDown_input,
-              style: { fontFamily: "Calibri", fontSize: 14, lineHeight: 1.3 },
-            }}
-            inputRef={inputRef}
-            margin="normal"
-            minRows={3}
-            multiline
-            onChange={(e) => setInputNote(e.target.value)}
-            size="small"
-            sx={{ backgroundColor: "white" }}
-            value={inputNote}
-            variant="outlined"
-          />
-          <Button
-            disabled={loading || !inputNote || Boolean(stagedNote)}
-            onClick={handleClick_submit}
-            variant="outlined"
-          >
-            {loading ? "Working... " : "Combine"}
-          </Button>
-        </Grid>
         <Grid item sx={{ padding: 1 }} xs={7}>
           {/* Output Section */}
           <Stack direction="row" spacing={1}>
             <Tabs value={outputTab} onChange={(e, v) => setOutputTab(v)}>
-              <Tab value="current" label="Output" />
+              <Tab value="current" label="Current Note" />
               {stagedNote && <Tab value="staging" label="Staging" />}
               {stagedNote && <Tab value="diff" label="Diff" />}
             </Tabs>
@@ -169,25 +152,17 @@ export default function Home() {
             )}
           </Stack>
           {outputTab != "diff" && (
-            <TextField
+            <BaseTextField
               disabled={loading}
-              fullWidth
-              id="output-textfield"
               inputProps={{
                 onKeyDown: handleKeyDown_output,
-                style: { fontFamily: "Calibri", fontSize: 14, lineHeight: 1.3 },
               }}
-              margin="normal"
-              multiline
               onChange={(e) =>
                 (outputTab == "current" ? setCurrentNote : setStagedNote)(
                   e.target.value
                 )
               }
-              size="small"
-              sx={{ backgroundColor: "white" }}
               value={outputTab == "current" ? currentNote : stagedNote}
-              variant="outlined"
             />
           )}
           {outputTab == "diff" && (
@@ -206,7 +181,33 @@ export default function Home() {
             />
           )}
         </Grid>
+        <Grid item sx={{ padding: 1 }} xs={5}>
+          {/* Input Section */}
+          <Tabs value={inputTab} onChange={(e, v) => setInputTab(v)}>
+            <Tab value="merge" label="Merge" />
+            <Tab value="command" label="Command" />
+            <Tab value="question" label="Question" />
+          </Tabs>
+          <BaseTextField
+            disabled={loading || Boolean(stagedNote)}
+            inputProps={{
+              onKeyDown: handleKeyDown_input,
+            }}
+            inputRef={inputRef}
+            minRows={3}
+            onChange={(e) => setInputNote(e.target.value)}
+            value={inputNote}
+          />
+          <Button
+            disabled={loading || !inputNote || Boolean(stagedNote)}
+            onClick={handleClick_runInput}
+            variant="outlined"
+          >
+            {loading ? "Working... " : "Run"}
+          </Button>
+        </Grid>
       </Grid>
     </>
   );
 }
+

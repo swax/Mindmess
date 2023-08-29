@@ -1,17 +1,19 @@
 "use server";
 
 import OpenAI from "openai";
+import { MergeCommandResponse } from "./MergeCommandResponse";
 
 const openai = new OpenAI({
   apiKey: process.env["OPENAI_API_KEY"],
 });
 
-const systemMessage = `Combine the 'Existing Notes' with the 'Input Notes' to create a Combined Note. 
-Deduplicate and reorganize notes if possible to improve the overall understanding.
-Organize the notes in a tree using the tab character for nesting.
+const systemMessage = `Run the specificed 'Command' on the 'Existing Notes' to create a new 'Output Note'.
 Give a summary of changes at the bottom prefixed with **.`;
 
-export async function processAction(note: string, existingNotes: string) {
+export async function commandAction(
+  command: string,
+  existingNotes: string
+): Promise<MergeCommandResponse> {
   let result = {
     newNote: "",
     error: "",
@@ -19,7 +21,7 @@ export async function processAction(note: string, existingNotes: string) {
 
   try {
     const userMsg1 = `Existing Notes:\n${existingNotes}`;
-    const userMsg2 = `Input Notes:\n${note}`;
+    const userMsg2 = `Command:\n${command}`;
 
     const chatCompletion = await openai.chat.completions.create({
       model: "gpt-4",
@@ -31,17 +33,14 @@ export async function processAction(note: string, existingNotes: string) {
     });
 
     const content = chatCompletion.choices[0].message.content;
-    
-    if (!content)
-    {
-      result.error = "Error: No result";
-    }
-    else {
-      result.newNote = content.replace(/combined note(s)?( output)?:(\n)?/i, "");
-    }
 
+    if (!content) {
+      result.error = "Error: No result";
+    } else {
+      result.newNote = content.replace(/output note(s)?:(\n)?/i, "");
+    }
   } catch (e) {
-    result.error = '' + e;
+    result.error = "" + e;
   }
 
   return result;
