@@ -18,7 +18,7 @@ export default function BaseTextField(props: TextFieldProps) {
           ...props.inputProps?.style,
         },
       }}
-      sx={{ backgroundColor: "white", ...props.sx }}
+      sx={{ ...props.sx }}
     />
   );
 }

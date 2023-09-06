@@ -8,6 +8,7 @@ import {
   Button,
   Grid,
   LinearProgress,
+  Link,
   Paper,
   Stack,
   Tab,
@@ -25,6 +26,8 @@ import { commandAction } from "./actions/command-action";
 import { mergeAction } from "./actions/merge-action";
 import { questionAction } from "./actions/question-action";
 import BaseTextField from "./components/BaseTextField";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 export default function Home() {
   // Hooks
@@ -56,6 +59,11 @@ export default function Home() {
       acceptButtonRef.current?.focus();
     }
   }, [focus]);
+
+  useEffect(() => {
+    document.title = "Mindmess";
+    document.title += loading ? " (Working...)" : "";
+  }, [loading]);
 
   // Event Handlers
   function handleKeyDown_input(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -162,6 +170,24 @@ export default function Home() {
               {stagedNote && <Tab value="diff" label="Diff" />}
             </Tabs>
             <Box sx={{ flexGrow: 1 }} />
+            <Stack
+              direction="row"
+              sx={{ display: "none", paddingRight: 2, paddingTop: 3 }}
+            >
+              <Link onClick={() => alert("hi")}>
+                <ArrowBackIosNewIcon
+                  fontSize="small"
+                  sx={{ marginRight: 1, cursor: "pointer" }}
+                />
+              </Link>
+              <Typography>Version 30/30</Typography>
+              <Link onClick={() => alert("hi")}>
+                <ArrowForwardIosIcon
+                  fontSize="small"
+                  sx={{ marginLeft: 1, cursor: "pointer" }}
+                />
+              </Link>
+            </Stack>
             {/* Accept/Reject Section */}
             {stagedNote && (
               <>
@@ -191,27 +217,30 @@ export default function Home() {
               inputProps={{
                 onKeyDown: handleKeyDown_output,
               }}
+              minRows={10}
               onChange={(e) =>
                 (outputTab == "current" ? setCurrentNote : setStagedNote)(
                   e.target.value
                 )
               }
+              spellCheck={false}
               value={outputTab == "current" ? currentNote : stagedNote}
             />
           )}
           {outputTab == "diff" && (
             <ReactDiffViewer
-              disableWordDiff={true}
-              showDiffOnly={false}
-              hideLineNumbers
-              newValue={stagedNote}
-              oldValue={currentNote}
-              splitView={false}
-              styles={{
-                contentText: {
-                  fontSize: 12,
-                },
-              }}
+            disableWordDiff={true}
+            hideLineNumbers
+            newValue={stagedNote}
+            oldValue={currentNote}
+            showDiffOnly={false}
+            splitView={false}
+            styles={{
+              contentText: {
+                fontSize: 12,
+              },
+            }}
+            useDarkTheme={true}
             />
           )}
         </Grid>
