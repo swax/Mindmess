@@ -15,7 +15,7 @@ Give a summary of changes at the bottom prefixed with **.`;
 
 export async function commandAction(
   command: string,
-  existingNotes: string
+  existingNotes: string,
 ): Promise<InputActionResponse> {
   let result = initInputActionResponse();
 

@@ -2,7 +2,7 @@ A GPT powered note 'building' app.
 
 Kind of like a reducer where the input is applied to the current note to produce a revised note.
 
-### Todo 
+### Todo
 
 - updates to note might not be being updated in chat
 
@@ -14,7 +14,9 @@ Kind of like a reducer where the input is applied to the current note to produce
 
 - Left side sticky side bar for managing multiple notes (db, essay, recipe, etc..)
 
-- Make spell check and mono font configurable 
+- history drop down?
+
+- Make spell check and mono font configurable
 
 - Dark/light mode switcher
 
@@ -23,5 +25,11 @@ Kind of like a reducer where the input is applied to the current note to produce
 - Test on Replit
 
 - Test with running open ai client side
-    - App as SSG on cloudflare
-    - User enters their own api key
+  - App as SSG on cloudflare
+  - User enters their own api key
+
+## Updating
+
+- Run `ncu` to review updates
+- Run `ncu -u` to update package.json
+- Run `npm update` to update package-lock.json
