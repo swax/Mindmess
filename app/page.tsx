@@ -38,10 +38,10 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [focus, setFocus] = useState<"accept" | "input" | "none">("input");
   const [outputTab, setOutputTab] = useState<"current" | "staging" | "diff">(
-    "current"
+    "current",
   );
   const [inputTab, setInputTab] = useState<"merge" | "command" | "question">(
-    "merge"
+    "merge",
   );
 
   const [chatLog, setChatLog] = useState<
@@ -157,7 +157,9 @@ export default function Home() {
   return (
     <>
       <AppBar sx={{ padding: 0.5, paddingLeft: 1.5 }} position="static">
-        <Typography variant="h6">Mindmess</Typography>
+        <Typography variant="h6" fontFamily="cursive">
+          Mindmess
+        </Typography>
       </AppBar>
       {loading && <LinearProgress />}
       <Grid container>
@@ -220,7 +222,7 @@ export default function Home() {
               minRows={10}
               onChange={(e) =>
                 (outputTab == "current" ? setCurrentNote : setStagedNote)(
-                  e.target.value
+                  e.target.value,
                 )
               }
               spellCheck={false}
@@ -229,18 +231,18 @@ export default function Home() {
           )}
           {outputTab == "diff" && (
             <ReactDiffViewer
-            disableWordDiff={true}
-            hideLineNumbers
-            newValue={stagedNote}
-            oldValue={currentNote}
-            showDiffOnly={false}
-            splitView={false}
-            styles={{
-              contentText: {
-                fontSize: 12,
-              },
-            }}
-            useDarkTheme={true}
+              disableWordDiff={true}
+              hideLineNumbers
+              newValue={stagedNote}
+              oldValue={currentNote}
+              showDiffOnly={false}
+              splitView={false}
+              styles={{
+                contentText: {
+                  fontSize: 12,
+                },
+              }}
+              useDarkTheme={true}
             />
           )}
         </Grid>

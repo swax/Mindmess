@@ -15,7 +15,7 @@ const systemMessage = `Run the following question on the 'Existing Notes'.`;
 export async function questionAction(
   question: string,
   existingNotes: string,
-  messageLog: OpenAI.Chat.Completions.ChatCompletionMessage[]
+  messageLog: OpenAI.Chat.Completions.ChatCompletionMessage[],
 ): Promise<InputActionResponse> {
   let result = initInputActionResponse();
 
