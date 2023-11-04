@@ -23,7 +23,7 @@ import OpenAI from "openai";
 import { useEffect, useRef, useState } from "react";
 import ReactDiffViewer from "react-diff-viewer-continued";
 import { useLocalStorage } from "react-use";
-import AppHeader from "./AppHeader";
+import AppHeader from "./components/AppHeader";
 import { commandAction } from "./actions/command-action";
 import { mergeAction } from "./actions/merge-action";
 import { questionAction } from "./actions/question-action";

@@ -4,7 +4,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Mindmess",
-  description: "Your mind is a mess",
+  description: "Collaborate on your notes with ChatGPT",
 };
 
 export default function RootLayout({
