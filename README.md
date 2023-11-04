@@ -1,35 +1,40 @@
-A GPT powered note 'building' app.
+## Mindmess
 
-Kind of like a reducer where the input is applied to the current note to produce a revised note.
+Your mind is a mess. Get your notes organized with ChatGPT. 
 
-### Todo
+### Use Cases
+- You have similar, but different notes on a particular topic all over the place. 
+  - Use Mindmess to iteratively merge them into a single document. 
+- You're working on a system architecture or database schema. 
+  - Go back and forth with the AI, modifying the schema, asking it for things you might of missed, etc..
 
-- updates to note might not be being updated in chat
+### Functions
+- **Merge:** Merge in a block on notes with the document. AI figures how how to merge the notes in.
+- **Command:** Ask the AI to perform an operation on the document. For example, "delete the last paragraph".
+- **Chat:** Chat with the AI about the document. For example, "what is the last paragraph about?".
 
-- Remove accept/reject, just use a note history
+### Tech stack
 
-- Re-add markdown view
+- OpenAI API
+- Next.js
+- React
+- TypeScript
+- MUI
 
-- Make right side a sticky side bar
+### Running Locally
 
-- Left side sticky side bar for managing multiple notes (db, essay, recipe, etc..)
+- `git clone https://github.com/swax/mindmess.git`
+- `npm install`
+- `npm run dev`
 
-- history drop down?
+### Running Remotely
+- Fork this repo
+- Create a new app on Vercel
+- Point Vercel to your repo and deploy
 
-- Make spell check and mono font configurable
+### Updating
 
-- Dark/light mode switcher
-
-- Show line count
-
-- Test on Replit
-
-- Test with running open ai client side
-  - App as SSG on cloudflare
-  - User enters their own api key
-
-## Updating
-
+- (None of the packages are set to auto-update to make it easier to prevent regressions)
 - Run `ncu` to review updates
 - Run `ncu -u` to update package.json
 - Run `npm update` to update package-lock.json
