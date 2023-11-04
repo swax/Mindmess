@@ -1,4 +1,5 @@
 import { clearApiKey, getApiKey, saveApiKey } from "@/utils/apiKey";
+import GitHubIcon from "@mui/icons-material/GitHub";
 import {
   AppBar,
   Box,
@@ -12,7 +13,6 @@ import {
 } from "@mui/material";
 import { useRef, useState } from "react";
 import { useEffectOnce } from "react-use";
-import GitHubIcon from "@mui/icons-material/GitHub";
 
 export default function AppHeader() {
   // Hooks
@@ -65,7 +65,11 @@ export default function AppHeader() {
   return (
     <AppBar position="static" sx={{ padding: 0.5 }}>
       <Toolbar disableGutters sx={{ gap: 1 }} variant="dense">
-        <Typography fontFamily="cursive" sx={{ flexGrow: 1, marginLeft: 1 }} variant="h6">
+        <Typography
+          fontFamily="cursive"
+          sx={{ flexGrow: 1, marginLeft: 1 }}
+          variant="h6"
+        >
           Mindmess
         </Typography>
         {pageLoaded && (
@@ -144,7 +148,11 @@ export default function AppHeader() {
             </Popover>
           </div>
         )}
-        <IconButton aria-label="Github" href="https://github.com/swax/mindmess" target="_blank">
+        <IconButton
+          aria-label="Github"
+          href="https://github.com/swax/mindmess"
+          target="_blank"
+        >
           <GitHubIcon />
         </IconButton>
       </Toolbar>
