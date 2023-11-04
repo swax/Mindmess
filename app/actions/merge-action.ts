@@ -1,14 +1,11 @@
-"use server";
+//"use server";
 
+import { getApiKeyOrThrow } from "@/utils/apiKey";
 import OpenAI from "openai";
 import {
   InputActionResponse,
   initInputActionResponse,
 } from "./InputActionResponse";
-
-const openai = new OpenAI({
-  apiKey: process.env["OPENAI_API_KEY"],
-});
 
 const systemMessage = `Combine the 'Existing Notes' with the 'Input Notes' to create an 'Output Note'. 
 Deduplicate and reorganize notes if possible to improve the overall understanding.
@@ -22,6 +19,11 @@ export async function mergeAction(
   let result = initInputActionResponse();
 
   try {
+    const openai = new OpenAI({
+      apiKey: getApiKeyOrThrow(), //process.env["OPENAI_API_KEY"],
+      dangerouslyAllowBrowser: true,
+    });
+
     const noteMsg = `Existing Notes:\n${existingNotes}`;
     const inputMsg = `Input Notes:\n${note}`;
 

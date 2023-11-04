@@ -1,9 +1,10 @@
 "use client";
 
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import PersonIcon from "@mui/icons-material/Person";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import {
-  AppBar,
   Box,
   Button,
   Grid,
@@ -22,12 +23,11 @@ import OpenAI from "openai";
 import { useEffect, useRef, useState } from "react";
 import ReactDiffViewer from "react-diff-viewer-continued";
 import { useLocalStorage } from "react-use";
+import AppHeader from "./AppHeader";
 import { commandAction } from "./actions/command-action";
 import { mergeAction } from "./actions/merge-action";
 import { questionAction } from "./actions/question-action";
 import BaseTextField from "./components/BaseTextField";
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 export default function Home() {
   // Hooks
@@ -156,11 +156,7 @@ export default function Home() {
   // Rendering
   return (
     <>
-      <AppBar sx={{ padding: 0.5, paddingLeft: 1.5 }} position="static">
-        <Typography variant="h6" fontFamily="cursive">
-          Mindmess
-        </Typography>
-      </AppBar>
+      <AppHeader />
       {loading && <LinearProgress />}
       <Grid container>
         <Grid item sx={{ padding: 1 }} xs={7}>
