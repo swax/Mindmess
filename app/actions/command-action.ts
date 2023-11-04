@@ -1,14 +1,11 @@
-"use server";
+//"use server";
 
+import { getApiKeyOrThrow } from "@/utils/apiKey";
 import OpenAI from "openai";
 import {
   InputActionResponse,
   initInputActionResponse,
 } from "./InputActionResponse";
-
-const openai = new OpenAI({
-  apiKey: process.env["OPENAI_API_KEY"],
-});
 
 const systemMessage = `Run the specificed 'Command' on the 'Existing Notes' to create a new 'Output Note'.
 Give a summary of changes at the bottom prefixed with **.`;
@@ -20,6 +17,11 @@ export async function commandAction(
   let result = initInputActionResponse();
 
   try {
+    const openai = new OpenAI({
+      apiKey: getApiKeyOrThrow(), //process.env["OPENAI_API_KEY"],
+      dangerouslyAllowBrowser: true,
+    });
+
     const noteMsg = `Existing Notes:\n${existingNotes}`;
     const commandMsg = `Command:\n${command}`;
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import "./globals.css";
 import ThemeRegistry from "./ThemeRegistry";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Mindmess",
