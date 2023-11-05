@@ -1,8 +1,13 @@
+import gptModels, { GPTModel } from "@/utils/gptModels";
 import { tabInput } from "@/utils/textEditing";
 import PersonIcon from "@mui/icons-material/Person";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import {
+  Box,
   Button,
+  Chip,
+  Menu,
+  MenuItem,
   Paper,
   Stack,
   Tab,
@@ -46,12 +51,19 @@ export default function InputSection({
 }: InputSectionProps) {
   // Hooks
   const [inputTab, setInputTab] = useState<"merge" | "command" | "question">(
-    "merge"
+    "merge",
   );
 
   const [chatLog, setChatLog] = useState<
     OpenAI.Chat.Completions.ChatCompletionMessage[]
   >([]);
+
+  const [gptModel, setGptModel] = useState<GPTModel>(gptModels[0]);
+  const [modelMenuAnchorEl, setModelMenuAnchorEl] = useState<HTMLDivElement>();
+  const modelMenuOpen = Boolean(modelMenuAnchorEl);
+
+  const [usageReport, setUsageReport] = useState<string>("");
+  const [totalCost, setTotalCost] = useState<number>(0);
 
   const runNumber = useRef(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -78,14 +90,15 @@ export default function InputSection({
     setFocus("none");
 
     const runNumberCheck = runNumber.current;
+    const existingNotes = currentNote || "";
 
     const response =
       inputTab == "merge"
-        ? await mergeAction(input, currentNote || "")
+        ? await mergeAction(input, existingNotes, gptModel.name)
         : inputTab == "command"
-        ? await commandAction(input, currentNote || "")
+        ? await commandAction(input, existingNotes, gptModel.name)
         : inputTab == "question"
-        ? await questionAction(input, currentNote || "", chatLog)
+        ? await questionAction(input, existingNotes, chatLog, gptModel.name)
         : undefined;
 
     // Check if this run was cancelled
@@ -99,6 +112,16 @@ export default function InputSection({
       alert(response.error);
       return;
     }
+
+    let cost =
+      (response.inputTokens * gptModel.costPer1kInput) / 1000 +
+      (response.outputTokens * gptModel.costPer1kOutput) / 1000;
+    setUsageReport(
+      `Last Run: Input ${response.inputTokens} tokens, output ${
+        response.outputTokens
+      } tokens. Cost $${cost.toFixed(4)}`,
+    );
+    setTotalCost(totalCost + cost);
 
     if (inputTab == "question") {
       setChatLog([...chatLog, ...response.chatLog]);
@@ -166,6 +189,7 @@ export default function InputSection({
         onChange={(e) => setInput(e.target.value)}
         value={input}
       />
+      {/* Run Buttons */}
       <Stack direction="row" spacing={1}>
         <Button
           disabled={loading || !input || Boolean(stagedNote)}
@@ -189,6 +213,47 @@ export default function InputSection({
           </Button>
         )}
       </Stack>
+      {/* Model Selection */}
+      <Chip
+        label={"Using " + gptModel.description}
+        onClick={(e) => setModelMenuAnchorEl(e.currentTarget)}
+        size="small"
+        sx={{ marginTop: 2 }}
+      />
+      <Menu
+        anchorEl={modelMenuAnchorEl}
+        onClose={() => setModelMenuAnchorEl(undefined)}
+        open={modelMenuOpen}
+      >
+        {gptModels.map((model, index) => (
+          <MenuItem
+            key={index}
+            onClick={() => {
+              setGptModel(model);
+              setModelMenuAnchorEl(undefined);
+            }}
+          >
+            <Stack>
+              <Box>{model.description}</Box>
+              <Box sx={{ fontSize: 12, color: "text.secondary" }}>
+                Input ${model.costPer1kInput}, Output ${model.costPer1kOutput}{" "}
+                per 1k tokens
+              </Box>
+            </Stack>
+          </MenuItem>
+        ))}
+      </Menu>
+      {/* Usage Report */}
+      {totalCost > 0 && (
+        <Box sx={{ marginTop: 2 }}>
+          <Box sx={{ fontSize: 12, color: "text.secondary" }}>
+            {usageReport}
+          </Box>
+          <Box sx={{ fontSize: 12, color: "text.secondary" }}>
+            Running Total Cost: ${totalCost.toFixed(4)}
+          </Box>
+        </Box>
+      )}
     </>
   );
 }

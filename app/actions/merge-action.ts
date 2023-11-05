@@ -1,10 +1,12 @@
 //"use server";
 
 import { getApiKeyOrThrow } from "@/utils/apiKey";
+import { GptModelName } from "@/utils/gptModels";
 import OpenAI from "openai";
 import {
   InputActionResponse,
   initInputActionResponse,
+  setTokensUsed,
 } from "./InputActionResponse";
 
 const systemMessage = `Combine the 'Existing Notes' with the 'Input Notes' to create an 'Output Note'. 
@@ -15,6 +17,7 @@ Give a summary of changes at the bottom prefixed with **.`;
 export async function mergeAction(
   note: string,
   existingNotes: string,
+  modelName: GptModelName,
 ): Promise<InputActionResponse> {
   let result = initInputActionResponse();
 
@@ -28,7 +31,7 @@ export async function mergeAction(
     const inputMsg = `Input Notes:\n${note}`;
 
     const chatCompletion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: modelName,
       messages: [
         { role: "system", content: systemMessage },
         { role: "user", content: noteMsg },
@@ -43,6 +46,8 @@ export async function mergeAction(
     } else {
       result.newNote = newNote.replace(/output note(s)?:(\n)?/i, "");
     }
+
+    setTokensUsed(chatCompletion, result);
   } catch (e) {
     result.error = "" + e;
   }

@@ -1,10 +1,12 @@
 //"use server";
 
 import { getApiKeyOrThrow } from "@/utils/apiKey";
+import { GptModelName } from "@/utils/gptModels";
 import OpenAI from "openai";
 import {
   InputActionResponse,
   initInputActionResponse,
+  setTokensUsed,
 } from "./InputActionResponse";
 
 const systemMessage = `Run the following question on the 'Existing Notes'.`;
@@ -13,6 +15,7 @@ export async function questionAction(
   question: string,
   existingNotes: string,
   messageLog: OpenAI.Chat.Completions.ChatCompletionMessage[],
+  modelName: GptModelName,
 ): Promise<InputActionResponse> {
   let result = initInputActionResponse();
 
@@ -29,7 +32,7 @@ export async function questionAction(
     ];
 
     const chatCompletion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: modelName,
       messages: [
         { role: "system", content: systemMessage },
         { role: "user", content: noteMsg },
@@ -50,6 +53,8 @@ export async function questionAction(
 
       result.chatLog = questionAnswer;
     }
+
+    setTokensUsed(chatCompletion, result);
   } catch (e) {
     result.error = "" + e;
   }

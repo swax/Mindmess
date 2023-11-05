@@ -68,6 +68,7 @@ export default function AppHeader() {
         <Typography
           fontFamily="cursive"
           sx={{ flexGrow: 1, marginLeft: 1 }}
+          title="Your mind is a mess."
           variant="h6"
         >
           Mindmess
