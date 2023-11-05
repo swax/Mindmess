@@ -27,7 +27,7 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [stagedNote, setStagedNote] = useState("");
   const [loading, setLoading] = useState(false);
-  const [focus, setFocus] = useState<FocusType>("input");
+  const [focus, setFocus] = useState<FocusType | null>("input");
   const [outputTab, setOutputTab] = useState<OutputTabType>("current");
 
   const acceptButtonRef = useRef<HTMLButtonElement>(null);
@@ -35,6 +35,7 @@ export default function Home() {
   useEffect(() => {
     if (focus === "accept") {
       acceptButtonRef.current?.focus();
+      setFocus(null);
     }
   }, [focus]);
 
@@ -81,7 +82,7 @@ export default function Home() {
               {stagedNote && <Tab value="diff" label="Diff" />}
             </Tabs>
             <Box sx={{ flexGrow: 1 }} />
-            {/* Accept/Reject Section */}
+            {/* Accept/Reject Toolbar */}
             {stagedNote && (
               <>
                 <Stack direction="row" spacing={1}>
@@ -108,6 +109,7 @@ export default function Home() {
             <BaseTextField
               disabled={loading}
               inputProps={{
+                "aria-label": "Output",
                 onKeyDown: handleKeyDown_output,
               }}
               minRows={10}
@@ -116,6 +118,15 @@ export default function Home() {
                   e.target.value,
                 )
               }
+              placeholder={`This is your current note. 
+
+Use the options on the right to merge in additional notes, transform the note with a command, or ask questions about the note. 
+
+After a command runs, verify you want to keep the change by clicking Accept or Reject before running another command. 
+
+Set your OpenAI API key in the upper-right. Your key is stored in local storage, not sent to any server.
+API calls are made directly to OpenAI from your machine. 
+You can also run the app yourself by building the code from Github.`}
               spellCheck={false}
               value={outputTab == "current" ? currentNote : stagedNote}
             />

@@ -24,12 +24,14 @@ import { questionAction } from "../actions/question-action";
 import { FocusType, OutputTabType } from "../page";
 import BaseTextField from "./BaseTextField";
 
+type InputTabType = "merge" | "command" | "question";
+
 interface InputSectionProps {
   currentNote?: string;
   input: string;
-  focus: FocusType;
+  focus: FocusType | null;
   loading: boolean;
-  setFocus: (focus: FocusType) => void;
+  setFocus: (focus: FocusType | null) => void;
   setInput: (input: string) => void;
   setLoading: (loading: boolean) => void;
   setStagedNote: (note: string) => void;
@@ -50,9 +52,7 @@ export default function InputSection({
   stagedNote,
 }: InputSectionProps) {
   // Hooks
-  const [inputTab, setInputTab] = useState<"merge" | "command" | "question">(
-    "merge",
-  );
+  const [inputTab, setInputTab] = useState<InputTabType>("merge");
 
   const [chatLog, setChatLog] = useState<
     OpenAI.Chat.Completions.ChatCompletionMessage[]
@@ -71,6 +71,7 @@ export default function InputSection({
   useEffect(() => {
     if (focus === "input") {
       inputRef.current?.focus();
+      setFocus(null);
     }
   }, [focus]);
 
@@ -140,10 +141,18 @@ export default function InputSection({
     runNumber.current++;
   }
 
+  function handleChange_inputTab(
+    e: React.ChangeEvent<{}>,
+    value: InputTabType,
+  ) {
+    setInputTab(value);
+    setFocus("input");
+  }
+
   // Rendering
   return (
     <>
-      <Tabs value={inputTab} onChange={(e, v) => setInputTab(v)}>
+      <Tabs value={inputTab} onChange={handleChange_inputTab}>
         <Tab value="merge" label="Merge" />
         <Tab value="command" label="Command" />
         <Tab value="question" label="Question" />
@@ -182,6 +191,7 @@ export default function InputSection({
       <BaseTextField
         disabled={loading || Boolean(stagedNote)}
         inputProps={{
+          "aria-label": "Input",
           onKeyDown: handleKeyDown_input,
         }}
         inputRef={inputRef}
@@ -190,14 +200,16 @@ export default function InputSection({
         value={input}
       />
       {/* Run Buttons */}
-      <Stack direction="row" spacing={1}>
-        <Button
-          disabled={loading || !input || Boolean(stagedNote)}
-          onClick={handleClick_runInput}
-          variant="outlined"
-        >
-          {loading ? "Working... " : "Run " + inputTab}
-        </Button>
+      <Stack alignItems="center" direction="row" spacing={1}>
+        {!Boolean(stagedNote) && (
+          <Button
+            disabled={loading || !input}
+            onClick={handleClick_runInput}
+            variant="outlined"
+          >
+            {loading ? "Working... " : "Run " + inputTab}
+          </Button>
+        )}
         {loading && (
           <Button
             color="error"
@@ -212,7 +224,9 @@ export default function InputSection({
             Clear Chat
           </Button>
         )}
+        {Boolean(stagedNote) && <Box>⬅️ Review Changes</Box>}
       </Stack>
+
       {/* Model Selection */}
       <Chip
         label={"Using " + gptModel.description}
