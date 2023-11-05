@@ -94,7 +94,7 @@ export default function AppHeader() {
             >
               <Stack>
                 <Typography
-                  sx={{ color: "lightgrey", fontSize: 13, padding: 1 }}
+                  sx={{ color: "lightgrey", fontSize: 15, padding: 1 }}
                 >
                   Get your API key{" "}
                   <a
@@ -113,7 +113,7 @@ export default function AppHeader() {
                   onChange={(e) => setLocalApiKey(e.target.value)}
                   onKeyDown={handleKeyDown_textField}
                   size="small"
-                  sx={{ margin: 1, marginTop: 2, paddingRight: 2 }}
+                  sx={{ margin: 1, marginTop: 1, paddingRight: 2 }}
                   value={localApiKey}
                   variant="outlined"
                 />
