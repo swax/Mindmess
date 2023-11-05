@@ -113,7 +113,7 @@ export default function Home() {
               minRows={10}
               onChange={(e) =>
                 (outputTab == "current" ? setCurrentNote : setStagedNote)(
-                  e.target.value
+                  e.target.value,
                 )
               }
               spellCheck={false}

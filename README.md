@@ -15,6 +15,11 @@ Your mind is a mess. Get your notes organized with ChatGPT.
 - **Command:** Ask the AI to perform an operation on the document. For example, "delete the last paragraph".
 - **Chat:** Chat with the AI about the document. For example, "what is the last paragraph about?".
 
+### Features
+
+- **Model Selection:** Choose from a variety of OpenAI GPT models
+- **Spend Tracking:** Mindmess tallies up how much you've spent so far in API fees by model
+
 ### Tech stack
 
 - OpenAI API

@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
 import ThemeRegistry from "./ThemeRegistry";
 import "./globals.css";
@@ -16,6 +17,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ThemeRegistry options={{ key: "mui" }}>{children}</ThemeRegistry>
+        <Analytics />
       </body>
     </html>
   );
