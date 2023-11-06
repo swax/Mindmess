@@ -20,6 +20,7 @@ Your mind is a mess. Get your notes organized with ChatGPT.
 
 - **Model Selection:** Choose from a variety of OpenAI GPT models
 - **Spend Tracking:** Mindmess tallies up how much you've spent so far in API fees by model
+- **Output Views:** Select to view your output as editable text, monospaced, or markdown
 
 ### Tech stack
 
@@ -37,13 +38,19 @@ Your mind is a mess. Get your notes organized with ChatGPT.
 
 ### Running Remotely
 
-- Fork this repo
-- Create a new app on Vercel
-- Point Vercel to your repo and deploy
+- Fork this repo and point Vercel at it
+- Or run it standalone on any VPS or cloud provider
 
 ### Updating
 
-- (None of the packages are set to auto-update to make it easier to prevent regressions)
 - Run `ncu` to review updates
-- Run `ncu -u` to update package.json
+- Run `ncu -u` to explicitly update package.json
 - Run `npm update` to update package-lock.json
+- (Packages are not set to auto-update to prevent regressions)
+
+### Contributing
+
+- Open an issue with your idea or intention
+- Implement the change on a branch
+- Create a PR with your change, so it can be reviewed and merged
+- Become a collaborator and help review other ideas and PRs

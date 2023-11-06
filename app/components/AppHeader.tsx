@@ -1,4 +1,5 @@
-import { clearApiKey, getApiKey, saveApiKey } from "@/utils/apiKey";
+import { localStorageApiKeyKey } from "@/utils/apiKey";
+import useLocalStorageSsr from "@/utils/useLocalStorageSsr";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import {
   AppBar,
@@ -12,34 +13,30 @@ import {
   Typography,
 } from "@mui/material";
 import { useRef, useState } from "react";
-import { useEffectOnce } from "react-use";
 
 export default function AppHeader() {
   // Hooks
-  const [pageLoaded, setPageLoaded] = useState(false);
-  const [localApiKey, setLocalApiKey] = useState<string>("");
-  const [editKeyAnchorEl, setEditKeyAnchorEl] = useState<HTMLElement>();
+  const [apiKey, setApiKey, apiKeyLoaded] = useLocalStorageSsr(
+    localStorageApiKeyKey,
+    "",
+  );
+  const [newApiKey, setNewApiKey] = useState<string>("");
+  const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement>();
 
-  const apiKeyInputRef = useRef<HTMLInputElement>(null);
-
-  useEffectOnce(() => {
-    // Need to wait until client is loaded to query local storage for the api key
-    setPageLoaded(true);
-    setLocalApiKey(getApiKey());
-  });
+  const newKeyInputRef = useRef<HTMLInputElement>(null);
 
   // Event Handlers
   function handleClick_openMenu(e: React.MouseEvent<HTMLElement>) {
-    setEditKeyAnchorEl(e.currentTarget);
-    setLocalApiKey(getApiKey());
+    setMenuAnchorEl(e.currentTarget);
+    setNewApiKey("");
 
     setTimeout(() => {
-      apiKeyInputRef.current?.focus();
+      newKeyInputRef.current?.focus();
     }, 100);
   }
 
   function handleClose_menu() {
-    setEditKeyAnchorEl(undefined);
+    setMenuAnchorEl(undefined);
   }
 
   function handleKeyDown_textField(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -50,18 +47,17 @@ export default function AppHeader() {
   }
 
   function handleClick_setApiKey() {
-    saveApiKey(localApiKey);
+    setApiKey(newApiKey);
+    setNewApiKey("");
     handleClose_menu();
   }
 
   function handleClick_clearApiKey() {
-    clearApiKey();
-    setLocalApiKey("");
+    setApiKey("");
+    setNewApiKey("");
   }
 
   // Rendering
-  const currentApiKey = pageLoaded ? getApiKey() : "";
-
   return (
     <AppBar position="static" sx={{ padding: 0.5 }}>
       <Toolbar disableGutters sx={{ gap: 1 }} variant="dense">
@@ -73,67 +69,74 @@ export default function AppHeader() {
         >
           Mindmess
         </Typography>
-        {pageLoaded && (
-          <div>
+        <div>
+          {apiKeyLoaded && (
             <Button
-              color={currentApiKey ? "inherit" : "warning"}
+              color={apiKey ? "inherit" : "warning"}
               onClick={handleClick_openMenu}
               size="small"
               variant="outlined"
             >
-              {!currentApiKey ? "Set" : ""} OpenAI API Key
+              {!apiKey ? "Set" : ""} OpenAI API Key
             </Button>
-            <Popover
-              anchorEl={editKeyAnchorEl}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-              onClose={handleClose_menu}
-              open={Boolean(editKeyAnchorEl)}
-            >
-              <Stack>
-                <Typography
-                  sx={{ color: "lightgrey", fontSize: 15, padding: 1 }}
+          )}
+          <Popover
+            anchorEl={menuAnchorEl}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "left",
+            }}
+            onClose={handleClose_menu}
+            open={Boolean(menuAnchorEl)}
+          >
+            <Stack>
+              <Typography sx={{ color: "lightgrey", fontSize: 15, padding: 1 }}>
+                Get your API key{" "}
+                <a
+                  href="https://platform.openai.com/account/api-keys"
+                  target="_blank"
                 >
-                  Get your API key{" "}
-                  <a
-                    href="https://platform.openai.com/account/api-keys"
-                    target="_blank"
-                  >
-                    here
-                  </a>
-                </Typography>
+                  here
+                </a>
+              </Typography>
 
-                {!currentApiKey && (
-                  <TextField
-                    autoComplete="off"
-                    fullWidth
-                    inputRef={apiKeyInputRef}
-                    label="OpenAI API Key"
-                    onChange={(e) => setLocalApiKey(e.target.value)}
-                    onKeyDown={handleKeyDown_textField}
-                    size="small"
-                    sx={{ margin: 1, marginTop: 1, paddingRight: 2 }}
-                    value={localApiKey}
-                    variant="outlined"
-                  />
-                )}
+              {!apiKey && (
+                <TextField
+                  autoComplete="off"
+                  fullWidth
+                  inputRef={newKeyInputRef}
+                  label="OpenAI API Key"
+                  onChange={(e) => setNewApiKey(e.target.value)}
+                  onKeyDown={handleKeyDown_textField}
+                  size="small"
+                  sx={{ margin: 1, marginTop: 1, paddingRight: 2 }}
+                  value={newApiKey}
+                  variant="outlined"
+                />
+              )}
 
-                <Stack
-                  alignItems="center"
-                  direction="row"
-                  paddingRight={1}
-                  spacing={1}
-                >
-                  <Box sx={{ flexGrow: 1 }} />
-                  {currentApiKey ? (
-                    <Box paddingRight={1} textAlign="right">
-                      {currentApiKey.slice(0, 4) +
-                        "..." +
-                        currentApiKey.slice(-4)}
+              <Stack
+                alignItems="center"
+                direction="row"
+                paddingRight={1}
+                spacing={1}
+              >
+                {apiKey ? (
+                  <>
+                    <Box sx={{ flexGrow: 1, paddingLeft: 1 }}>
+                      {`Key: ${apiKey.slice(0, 4)}...${apiKey.slice(-4)}`}
                     </Box>
-                  ) : (
+                    <Button
+                      color="inherit"
+                      onClick={handleClick_clearApiKey}
+                      variant="outlined"
+                    >
+                      Clear
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Box sx={{ flexGrow: 1 }} />
                     <Button
                       color="success"
                       onClick={handleClick_setApiKey}
@@ -141,30 +144,22 @@ export default function AppHeader() {
                     >
                       Set
                     </Button>
-                  )}
-                  <Button
-                    color="inherit"
-                    onClick={handleClick_clearApiKey}
-                    variant="outlined"
-                  >
-                    Clear
-                  </Button>
-                </Stack>
-                <Typography
-                  sx={{ color: "lightgrey", fontSize: 13, padding: 1 }}
-                >
-                  Key stored in local storage. <br />
-                  Requests to OpenAI are made from your local. <br />
-                  Build from{" "}
-                  <a href="https://github.com/swax/mindmess" target="_blank">
-                    Github
-                  </a>{" "}
-                  to run site locally.
-                </Typography>
+                  </>
+                )}
               </Stack>
-            </Popover>
-          </div>
-        )}
+
+              <Typography sx={{ color: "lightgrey", fontSize: 13, padding: 1 }}>
+                Key stored in local storage. <br />
+                Requests to OpenAI are made from your local. <br />
+                Build from{" "}
+                <a href="https://github.com/swax/mindmess" target="_blank">
+                  Github
+                </a>{" "}
+                to run site locally.
+              </Typography>
+            </Stack>
+          </Popover>
+        </div>
         <IconButton
           aria-label="Github"
           href="https://github.com/swax/mindmess"
