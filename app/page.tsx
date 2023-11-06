@@ -1,17 +1,23 @@
 "use client";
 
-import { tabInput } from "@/utils/textEditing";
+import { capitalizeFirstLetter, tabInput } from "@/utils/textEditing";
+import SettingsIcon from "@mui/icons-material/Settings";
 import {
   Box,
   Button,
+  Chip,
   Grid,
+  IconButton,
   LinearProgress,
+  Menu,
+  MenuItem,
   Stack,
   Tab,
   Tabs,
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import ReactDiffViewer from "react-diff-viewer-continued";
+import Markdown from "react-markdown";
 import { useLocalStorage } from "react-use";
 import AppHeader from "./components/AppHeader";
 import BaseTextField from "./components/BaseTextField";
@@ -19,6 +25,7 @@ import InputSection from "./components/InputSection";
 
 export type FocusType = "accept" | "input" | "none";
 export type OutputTabType = "current" | "staging" | "diff";
+export type OutputFormatType = "standard" | "monospace" | "markdown";
 
 export default function Home() {
   // Hooks
@@ -29,6 +36,12 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [focus, setFocus] = useState<FocusType | null>("input");
   const [outputTab, setOutputTab] = useState<OutputTabType>("current");
+  const [outputFormat, setOutputFormat] =
+    useState<OutputFormatType>("standard");
+
+  const [configMenuAnchorEl, setConfigMenuAnchorEl] =
+    useState<HTMLButtonElement>();
+  const configMenuOpen = Boolean(configMenuAnchorEl);
 
   const acceptButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -74,13 +87,58 @@ export default function Home() {
       {loading && <LinearProgress />}
       <Grid container>
         <Grid item sx={{ padding: 1 }} xs={7}>
-          {/* Output Section */}
-          <Stack direction="row" spacing={1}>
-            <Tabs value={outputTab} onChange={(e, v) => setOutputTab(v)}>
-              <Tab value="current" label="Current Note" />
-              {stagedNote && <Tab value="staging" label="Staging" />}
-              {stagedNote && <Tab value="diff" label="Diff" />}
+          <Stack alignItems="center" direction="row" spacing={1}>
+            <Tabs onChange={(e, v) => setOutputTab(v)} value={outputTab}>
+              <Tab label="Current Note" value="current" />
+              {stagedNote && <Tab label="Staging" value="staging" />}
+              {stagedNote && <Tab label="Diff" value="diff" />}
             </Tabs>
+            {/* Config Menu */}
+            <IconButton
+              aria-label="Output Config"
+              onClick={(e) => setConfigMenuAnchorEl(e.currentTarget)}
+              size="small"
+            >
+              <SettingsIcon />
+            </IconButton>
+            <Menu
+              anchorEl={configMenuAnchorEl}
+              onClose={() => setConfigMenuAnchorEl(undefined)}
+              open={configMenuOpen}
+            >
+              <Box
+                sx={{ color: "text.secondary", fontSize: 12, marginLeft: 2 }}
+              >
+                View
+              </Box>
+              {(
+                ["standard", "monospace", "markdown"] as OutputFormatType[]
+              ).map((format) => (
+                <MenuItem
+                  key={format}
+                  onClick={() => {
+                    setOutputFormat(format);
+                    setConfigMenuAnchorEl(undefined);
+                  }}
+                >
+                  <Box
+                    sx={{
+                      color: outputFormat == format ? undefined : "transparent",
+                    }}
+                  >
+                    ✔&nbsp;
+                  </Box>{" "}
+                  {capitalizeFirstLetter(format)}
+                  {format == "markdown" && (
+                    <Chip
+                      label="Not Editable"
+                      size="small"
+                      sx={{ marginLeft: 1 }}
+                    />
+                  )}
+                </MenuItem>
+              ))}
+            </Menu>
             <Box sx={{ flexGrow: 1 }} />
             {/* Accept/Reject Toolbar */}
             {stagedNote && (
@@ -105,12 +163,19 @@ export default function Home() {
               </>
             )}
           </Stack>
-          {outputTab != "diff" && (
+          {outputTab != "diff" && outputFormat != "markdown" && (
             <BaseTextField
               disabled={loading}
               inputProps={{
                 "aria-label": "Output",
                 onKeyDown: handleKeyDown_output,
+                ...(outputFormat == "monospace"
+                  ? {
+                      style: {
+                        fontFamily: "monospace",
+                      },
+                    }
+                  : {}),
               }}
               minRows={10}
               onChange={(e) =>
@@ -130,6 +195,11 @@ You can also run the app yourself by building the code from Github.`}
               spellCheck={false}
               value={outputTab == "current" ? currentNote : stagedNote}
             />
+          )}
+          {outputTab != "diff" && outputFormat == "markdown" && (
+            <Markdown>
+              {outputTab == "current" ? currentNote : stagedNote}
+            </Markdown>
           )}
           {outputTab == "diff" && (
             <ReactDiffViewer

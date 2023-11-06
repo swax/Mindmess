@@ -8,6 +8,7 @@ Your mind is a mess. Get your notes organized with ChatGPT.
   - Use Mindmess to iteratively merge them into a single document.
 - You're working on a system architecture or database schema.
   - Go back and forth with the AI, modifying the schema, asking it for things you might of missed, etc..
+- Merging together news fragments from multiple sources along with comments
 
 ### Functions
 

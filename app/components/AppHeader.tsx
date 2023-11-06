@@ -56,7 +56,7 @@ export default function AppHeader() {
 
   function handleClick_clearApiKey() {
     clearApiKey();
-    handleClose_menu();
+    setLocalApiKey("");
   }
 
   // Rendering
@@ -105,27 +105,43 @@ export default function AppHeader() {
                   </a>
                 </Typography>
 
-                <TextField
-                  autoComplete="off"
-                  fullWidth
-                  inputRef={apiKeyInputRef}
-                  label="OpenAI API Key"
-                  onChange={(e) => setLocalApiKey(e.target.value)}
-                  onKeyDown={handleKeyDown_textField}
-                  size="small"
-                  sx={{ margin: 1, marginTop: 1, paddingRight: 2 }}
-                  value={localApiKey}
-                  variant="outlined"
-                />
-                <Stack direction="row" paddingRight={1} spacing={1}>
-                  <Box sx={{ flexGrow: 1 }} />
-                  <Button
-                    color="success"
-                    onClick={handleClick_setApiKey}
+                {!currentApiKey && (
+                  <TextField
+                    autoComplete="off"
+                    fullWidth
+                    inputRef={apiKeyInputRef}
+                    label="OpenAI API Key"
+                    onChange={(e) => setLocalApiKey(e.target.value)}
+                    onKeyDown={handleKeyDown_textField}
+                    size="small"
+                    sx={{ margin: 1, marginTop: 1, paddingRight: 2 }}
+                    value={localApiKey}
                     variant="outlined"
-                  >
-                    Set
-                  </Button>
+                  />
+                )}
+
+                <Stack
+                  alignItems="center"
+                  direction="row"
+                  paddingRight={1}
+                  spacing={1}
+                >
+                  <Box sx={{ flexGrow: 1 }} />
+                  {currentApiKey ? (
+                    <Box paddingRight={1} textAlign="right">
+                      {currentApiKey.slice(0, 4) +
+                        "..." +
+                        currentApiKey.slice(-4)}
+                    </Box>
+                  ) : (
+                    <Button
+                      color="success"
+                      onClick={handleClick_setApiKey}
+                      variant="outlined"
+                    >
+                      Set
+                    </Button>
+                  )}
                   <Button
                     color="inherit"
                     onClick={handleClick_clearApiKey}

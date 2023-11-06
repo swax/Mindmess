@@ -52,11 +52,11 @@ export default function ThemeRegistry(props: {
     }
     return (
       <style
-        key={cache.key}
-        data-emotion={`${cache.key} ${names.join(" ")}`}
         dangerouslySetInnerHTML={{
           __html: styles,
         }}
+        data-emotion={`${cache.key} ${names.join(" ")}`}
+        key={cache.key}
       />
     );
   });
