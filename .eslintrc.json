@@ -1,3 +1,7 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "react/jsx-sort-props": "warn", // Sort props alphabetically
+    "react-hooks/exhaustive-deps": "off" // A lot of false positives
+  }
 }

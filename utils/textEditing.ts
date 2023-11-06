@@ -10,3 +10,7 @@ export function tabInput(input: HTMLInputElement) {
 
   input.selectionStart = input.selectionEnd = start + 1;
 }
+
+export function capitalizeFirstLetter(string: string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}

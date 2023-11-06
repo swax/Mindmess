@@ -152,10 +152,10 @@ export default function InputSection({
   // Rendering
   return (
     <>
-      <Tabs value={inputTab} onChange={handleChange_inputTab}>
-        <Tab value="merge" label="Merge" />
-        <Tab value="command" label="Command" />
-        <Tab value="question" label="Question" />
+      <Tabs onChange={handleChange_inputTab} value={inputTab}>
+        <Tab label="Merge" value="merge" />
+        <Tab label="Command" value="command" />
+        <Tab label="Question" value="question" />
       </Tabs>
       {inputTab == "question" && (
         <Paper>
