@@ -6,8 +6,9 @@ import BaseTextField from "./BaseTextField";
 
 interface OutputSectionProps {
   currentNote?: string;
+  currentNoteLoaded: boolean;
   loading: boolean;
-  outputFormat: OutputFormatType;
+  outputFormat?: OutputFormatType;
   outputTab: OutputTabType;
   setCurrentNote: (note: string) => void;
   setStagedNote: (note: string) => void;
@@ -16,6 +17,7 @@ interface OutputSectionProps {
 
 export default function OutputSection({
   currentNote,
+  currentNoteLoaded,
   loading,
   outputFormat,
   outputTab,
@@ -40,6 +42,12 @@ export default function OutputSection({
   }
 
   // Rendering
+  const monospaceStyle = {
+    style: {
+      fontFamily: "monospace",
+    },
+  };
+
   return (
     <>
       {outputTab != "diff" && outputFormat != "markdown" && (
@@ -48,17 +56,13 @@ export default function OutputSection({
           inputProps={{
             "aria-label": "Output",
             onKeyDown: handleKeyDown_output,
-            ...(outputFormat == "monospace"
-              ? {
-                  style: {
-                    fontFamily: "monospace",
-                  },
-                }
-              : {}),
+            ...(outputFormat == "monospace" ? monospaceStyle : {}),
           }}
           minRows={10}
           onChange={handleChange_output}
-          placeholder={`This is your current note. 
+          placeholder={
+            currentNoteLoaded
+              ? `This is your current note. 
 
 Use the options on the right to merge in additional notes, transform the note with a command, or ask questions about the note. 
 
@@ -66,7 +70,9 @@ After a command runs, verify you want to keep the change by clicking Accept or R
 
 Set your OpenAI API key in the upper-right. Your key is stored in local storage, not sent to any server.
 API calls are made directly to OpenAI from your machine. 
-You can also run the app yourself by building the code from Github.`}
+You can also run the app yourself by building the code from Github.`
+              : ""
+          }
           spellCheck={false}
           value={outputTab == "current" ? currentNote : stagedNote}
         />

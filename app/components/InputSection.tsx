@@ -1,5 +1,6 @@
 import gptModels, { GPTModel } from "@/utils/gptModels";
 import { tabInput } from "@/utils/textEditing";
+import useLocalStorageSsr from "@/utils/useLocalStorageSsr";
 import PersonIcon from "@mui/icons-material/Person";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import {
@@ -52,7 +53,10 @@ export default function InputSection({
   stagedNote,
 }: InputSectionProps) {
   // Hooks
-  const [inputTab, setInputTab] = useState<InputTabType>("merge");
+  const [inputTab, setInputTab] = useLocalStorageSsr<InputTabType>(
+    "inputTab",
+    "merge"
+  );
 
   const [chatLog, setChatLog] = useState<
     OpenAI.Chat.Completions.ChatCompletionMessage[]
@@ -120,7 +124,7 @@ export default function InputSection({
     setUsageReport(
       `Last Run: Input ${response.inputTokens} tokens, output ${
         response.outputTokens
-      } tokens. Cost $${cost.toFixed(4)}`,
+      } tokens. Cost $${cost.toFixed(4)}`
     );
     setTotalCost(totalCost + cost);
 
@@ -143,7 +147,7 @@ export default function InputSection({
 
   function handleChange_inputTab(
     e: React.ChangeEvent<{}>,
-    value: InputTabType,
+    value: InputTabType
   ) {
     setInputTab(value);
     setFocus("input");

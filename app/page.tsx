@@ -1,8 +1,8 @@
 "use client";
 
+import useLocalStorageSsr from "@/utils/useLocalStorageSsr";
 import { Grid, LinearProgress } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useLocalStorage } from "react-use";
 import AppHeader from "./components/AppHeader";
 import InputSection from "./components/InputSection";
 import OutputSection from "./components/OutputSection";
@@ -14,16 +14,19 @@ export type OutputFormatType = "standard" | "monospace" | "markdown";
 
 export default function Home() {
   // Hooks
-  const [currentNote, setCurrentNote] = useLocalStorage("currentNote", "");
+  const [currentNote, setCurrentNote, currentNoteLoaded] =
+    useLocalStorageSsr<string>("currentNote", "");
   const [stagedNote, setStagedNote] = useState("");
 
   const [focus, setFocus] = useState<FocusType | null>("input");
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  
-  const [outputFormat, setOutputFormat] =
-    useState<OutputFormatType>("standard");
+
   const [outputTab, setOutputTab] = useState<OutputTabType>("current");
+  const [outputFormat, setOutputFormat] = useLocalStorageSsr<OutputFormatType>(
+    "outputFormat",
+    "standard",
+  );
 
   useEffect(() => {
     document.title = "Mindmess";
@@ -69,6 +72,7 @@ export default function Home() {
           <OutputSection
             {...{
               currentNote,
+              currentNoteLoaded,
               loading,
               outputFormat,
               outputTab,

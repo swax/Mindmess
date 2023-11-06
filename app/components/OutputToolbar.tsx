@@ -18,7 +18,7 @@ interface OutputToolbarProps {
   focus: FocusType | null;
   handleClick_accept: () => void;
   handleClick_reject: () => void;
-  outputFormat: OutputFormatType;
+  outputFormat?: OutputFormatType;
   outputTab: OutputTabType;
   setFocus: (focus: FocusType | null) => void;
   setOutputFormat: (format: OutputFormatType) => void;
