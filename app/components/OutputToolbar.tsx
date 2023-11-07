@@ -105,6 +105,7 @@ export default function OutputToolbar({
           aria-label="Output Config"
           onClick={(e) => setConfigMenuAnchorEl(e.currentTarget)}
           size="small"
+          sx={{ color: "lightgray" }}
         >
           <SettingsIcon />
         </IconButton>
@@ -141,7 +142,7 @@ export default function OutputToolbar({
                   />
                 )}
               </MenuItem>
-            ),
+            )
           )}
           <Divider />
           <MenuItem onClick={handleClick_spellCheck}>
@@ -154,6 +155,7 @@ export default function OutputToolbar({
           </MenuItem>
         </Menu>
       </Box>
+      <Box sx={{ clear: "both" }}></Box>
     </>
   );
 }

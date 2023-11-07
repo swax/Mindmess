@@ -23,7 +23,7 @@ import { commandAction } from "../actions/command-action";
 import { mergeAction } from "../actions/merge-action";
 import { questionAction } from "../actions/question-action";
 import { FocusType, OutputTabType } from "../page";
-import BaseTextField from "./BaseTextField";
+import NoteField from "./NoteField";
 
 type InputTabType = "merge" | "command" | "question";
 
@@ -176,7 +176,7 @@ export default function InputSection({
                 <TableCell sx={{ sverticalAlign: "top" }}>
                   <pre
                     style={{
-                      fontFamily: "Calibri",
+                      fontFamily: "Calibri, sans-serif",
                       fontSize: 14,
                       lineHeight: 1.3,
                       margin: 0,
@@ -192,7 +192,7 @@ export default function InputSection({
         </Paper>
       )}
 
-      <BaseTextField
+      <NoteField
         disabled={loading || Boolean(stagedNote)}
         inputProps={{
           "aria-label": "Input",

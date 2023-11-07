@@ -1,4 +1,5 @@
-@media (prefers-color-scheme: dark) {
+:root {
+  color-scheme: dark;
 }
 
 body {
@@ -7,4 +8,13 @@ body {
 
 a {
   color: lightblue;
+}
+
+/* If screen size smaller than md (900px) then this keeps input tab visible on the phone
+   This also prevents the page high level scroll bar from showing up when at half window size on a laptop */
+@media (max-width: 900px) {
+  .limitHeightOnSmallScreen {
+    max-height: 450px;
+    overflow: auto;
+  }
 }
