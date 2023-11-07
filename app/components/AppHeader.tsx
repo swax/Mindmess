@@ -77,7 +77,7 @@ export default function AppHeader() {
               size="small"
               variant="outlined"
             >
-              {!apiKey ? "Set" : ""} OpenAI API Key
+              {!apiKey ? "Set" : ""} API Key
             </Button>
           )}
           <Popover
@@ -155,7 +155,7 @@ export default function AppHeader() {
                 <a href="https://github.com/swax/mindmess" target="_blank">
                   Github
                 </a>{" "}
-                to run site locally.
+                to self-host.
               </Typography>
             </Stack>
           </Popover>

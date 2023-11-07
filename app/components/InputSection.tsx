@@ -55,7 +55,7 @@ export default function InputSection({
   // Hooks
   const [inputTab, setInputTab] = useLocalStorageSsr<InputTabType>(
     "inputTab",
-    "merge"
+    "merge",
   );
 
   const [chatLog, setChatLog] = useState<
@@ -124,7 +124,7 @@ export default function InputSection({
     setUsageReport(
       `Last Run: Input ${response.inputTokens} tokens, output ${
         response.outputTokens
-      } tokens. Cost $${cost.toFixed(4)}`
+      } tokens. Cost $${cost.toFixed(4)}`,
     );
     setTotalCost(totalCost + cost);
 
@@ -147,7 +147,7 @@ export default function InputSection({
 
   function handleChange_inputTab(
     e: React.ChangeEvent<{}>,
-    value: InputTabType
+    value: InputTabType,
   ) {
     setInputTab(value);
     setFocus("input");
@@ -161,7 +161,7 @@ export default function InputSection({
         <Tab label="Command" value="command" />
         <Tab label="Question" value="question" />
       </Tabs>
-      {inputTab == "question" && (
+      {inputTab == "question" && Boolean(chatLog.length) && (
         <Paper>
           <Table sx={{ marginTop: 1 }}>
             {chatLog.map((message, i) => (
@@ -201,6 +201,7 @@ export default function InputSection({
         inputRef={inputRef}
         minRows={3}
         onChange={(e) => setInput(e.target.value)}
+        sx={{ marginTop: 1 }}
         value={input}
       />
       {/* Run Buttons */}

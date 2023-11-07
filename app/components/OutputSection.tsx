@@ -1,17 +1,17 @@
 import { tabInput } from "@/utils/textEditing";
 import ReactDiffViewer from "react-diff-viewer-continued";
 import Markdown from "react-markdown";
-import { OutputFormatType, OutputTabType } from "../page";
+import { MindmessSettings, OutputTabType } from "../page";
 import BaseTextField from "./BaseTextField";
 
 interface OutputSectionProps {
   currentNote?: string;
   currentNoteLoaded: boolean;
   loading: boolean;
-  outputFormat?: OutputFormatType;
   outputTab: OutputTabType;
   setCurrentNote: (note: string) => void;
   setStagedNote: (note: string) => void;
+  settings: MindmessSettings;
   stagedNote: string;
 }
 
@@ -19,10 +19,10 @@ export default function OutputSection({
   currentNote,
   currentNoteLoaded,
   loading,
-  outputFormat,
   outputTab,
   setCurrentNote,
   setStagedNote,
+  settings,
   stagedNote,
 }: OutputSectionProps) {
   // Event Handlers
@@ -50,13 +50,14 @@ export default function OutputSection({
 
   return (
     <>
-      {outputTab != "diff" && outputFormat != "markdown" && (
+      {outputTab != "diff" && settings.outputFormat != "markdown" && (
         <BaseTextField
           disabled={loading}
           inputProps={{
             "aria-label": "Output",
             onKeyDown: handleKeyDown_output,
-            ...(outputFormat == "monospace" ? monospaceStyle : {}),
+            spellCheck: settings.spellCheck,
+            ...(settings.outputFormat == "monospace" ? monospaceStyle : {}),
           }}
           minRows={10}
           onChange={handleChange_output}
@@ -70,14 +71,14 @@ After a command runs, verify you want to keep the change by clicking Accept or R
 
 Set your OpenAI API key in the upper-right. Your key is stored in local storage, not sent to any server.
 API calls are made directly to OpenAI from your machine. 
-You can also run the app yourself by building the code from Github.`
+You can also self-host the app by building the code from Github.`
               : ""
           }
-          spellCheck={false}
+          sx={{ marginTop: 1 }}
           value={outputTab == "current" ? currentNote : stagedNote}
         />
       )}
-      {outputTab != "diff" && outputFormat == "markdown" && (
+      {outputTab != "diff" && settings.outputFormat == "markdown" && (
         <Markdown>{outputTab == "current" ? currentNote : stagedNote}</Markdown>
       )}
       {outputTab == "diff" && (
