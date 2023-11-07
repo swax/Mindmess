@@ -12,6 +12,11 @@ export type FocusType = "accept" | "input" | "none";
 export type OutputTabType = "current" | "staging" | "diff";
 export type OutputFormatType = "standard" | "monospace" | "markdown";
 
+export interface MindmessSettings {
+  outputFormat: OutputFormatType;
+  spellCheck: boolean;
+}
+
 export default function Home() {
   // Hooks
   const [currentNote, setCurrentNote, currentNoteLoaded] =
@@ -23,9 +28,13 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
 
   const [outputTab, setOutputTab] = useState<OutputTabType>("current");
-  const [outputFormat, setOutputFormat] = useLocalStorageSsr<OutputFormatType>(
-    "outputFormat",
-    "standard",
+
+  const [settings, setSettings] = useLocalStorageSsr<MindmessSettings>(
+    "settings",
+    {
+      outputFormat: "standard",
+      spellCheck: false,
+    }
   );
 
   useEffect(() => {
@@ -54,18 +63,18 @@ export default function Home() {
     <>
       <AppHeader />
       {loading && <LinearProgress />}
-      <Grid container>
-        <Grid item sx={{ padding: 1 }} xs={7}>
+      <Grid container padding={1} spacing={2}>
+        <Grid item md={7} sm={12} xs={12}>
           <OutputToolbar
             {...{
               focus,
               handleClick_accept,
               handleClick_reject,
-              outputFormat,
               outputTab,
               setFocus,
-              setOutputFormat,
               setOutputTab,
+              setSettings,
+              settings,
               stagedNote,
             }}
           />
@@ -74,15 +83,15 @@ export default function Home() {
               currentNote,
               currentNoteLoaded,
               loading,
-              outputFormat,
               outputTab,
               setCurrentNote,
               setStagedNote,
+              settings,
               stagedNote,
             }}
           />
         </Grid>
-        <Grid item sx={{ padding: 1 }} xs={5}>
+        <Grid item md={5} sm={12} xs={12}>
           <InputSection
             {...{
               currentNote,
