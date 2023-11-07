@@ -2,7 +2,8 @@ import { tabInput } from "@/utils/textEditing";
 import ReactDiffViewer from "react-diff-viewer-continued";
 import Markdown from "react-markdown";
 import { MindmessSettings, OutputTabType } from "../page";
-import BaseTextField from "./BaseTextField";
+import NoteField from "./NoteField";
+import { Box } from "@mui/material";
 
 interface OutputSectionProps {
   currentNote?: string;
@@ -51,7 +52,8 @@ export default function OutputSection({
   return (
     <>
       {outputTab != "diff" && settings.outputFormat != "markdown" && (
-        <BaseTextField
+        <NoteField
+          className="limitHeightOnSmallScreen"
           disabled={loading}
           inputProps={{
             "aria-label": "Output",
@@ -79,7 +81,11 @@ You can also self-host the app by building the code from Github.`
         />
       )}
       {outputTab != "diff" && settings.outputFormat == "markdown" && (
-        <Markdown>{outputTab == "current" ? currentNote : stagedNote}</Markdown>
+        <Box className="limitHeightOnSmallScreen">
+          <Markdown>
+            {outputTab == "current" ? currentNote : stagedNote}
+          </Markdown>
+        </Box>
       )}
       {outputTab == "diff" && (
         <ReactDiffViewer

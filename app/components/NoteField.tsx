@@ -1,6 +1,6 @@
 import { TextField, TextFieldProps } from "@mui/material";
 
-export default function BaseTextField(props: TextFieldProps) {
+export default function NoteField(props: TextFieldProps) {
   return (
     <TextField
       fullWidth
@@ -12,7 +12,7 @@ export default function BaseTextField(props: TextFieldProps) {
       inputProps={{
         ...props.inputProps,
         style: {
-          fontFamily: "Calibri",
+          fontFamily: "Calibri, sans-serif",
           fontSize: 14,
           lineHeight: 1.3,
           ...props.inputProps?.style,
