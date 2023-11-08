@@ -1,5 +1,5 @@
 import { capitalizeFirstLetter } from "@/utils/textEditing";
-import SettingsIcon from "@mui/icons-material/Settings";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import {
   Box,
   Button,
@@ -96,7 +96,7 @@ export default function OutputToolbar({
       {/* Output Tabs */}
       <Box sx={{ display: "flex", float: "left" }}>
         <Tabs onChange={(e, v) => setOutputTab(v)} value={outputTab}>
-          <Tab label="Current Note" value="current" />
+          <Tab label="Current Document" value="current" />
           {stagedNote && <Tab label="Staging" value="staging" />}
           {stagedNote && <Tab label="Diff" value="diff" />}
         </Tabs>
@@ -107,7 +107,7 @@ export default function OutputToolbar({
           size="small"
           sx={{ color: "lightgray" }}
         >
-          <SettingsIcon />
+          <MoreVertIcon />
         </IconButton>
         <Menu
           anchorEl={configMenuAnchorEl}
@@ -142,7 +142,7 @@ export default function OutputToolbar({
                   />
                 )}
               </MenuItem>
-            )
+            ),
           )}
           <Divider />
           <MenuItem onClick={handleClick_spellCheck}>
