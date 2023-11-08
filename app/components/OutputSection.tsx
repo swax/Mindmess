@@ -1,9 +1,9 @@
 import { tabInput } from "@/utils/textEditing";
+import { Box } from "@mui/material";
 import ReactDiffViewer from "react-diff-viewer-continued";
 import Markdown from "react-markdown";
 import { MindmessSettings, OutputTabType } from "../page";
 import NoteField from "./NoteField";
-import { Box } from "@mui/material";
 
 interface OutputSectionProps {
   currentNote?: string;
@@ -65,15 +65,11 @@ export default function OutputSection({
           onChange={handleChange_output}
           placeholder={
             currentNoteLoaded
-              ? `This is your current note. 
+              ? `Write your document here and use the tools on the right to work with it. 
 
-Use the options on the right to merge in additional notes, transform the note with a command, or ask questions about the note. 
+After a command runs, verify you want to keep the change by clicking Accept or Reject.
 
-After a command runs, verify you want to keep the change by clicking Accept or Reject before running another command. 
-
-Set your OpenAI API key in the upper-right. Your key is stored in local storage, not sent to any server.
-API calls are made directly to OpenAI from your machine. 
-You can also self-host the app by building the code from Github.`
+Set your OpenAI API key in the upper-right as this app stores all data locally, and talks with OpenAI directly`
               : ""
           }
           sx={{ marginTop: 1 }}

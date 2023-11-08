@@ -4,7 +4,7 @@ export type GptModelName =
   | "gpt-4"
   | "gpt-4-32k";
 
-export type GPTModel = {
+export type GptModel = {
   name: GptModelName;
   description: string;
   maxTokens: number;
@@ -12,7 +12,7 @@ export type GPTModel = {
   costPer1kOutput: number;
 };
 
-const gptModels: GPTModel[] = [
+const gptModels: GptModel[] = [
   {
     name: "gpt-3.5-turbo",
     description: "GPT-3 4k",

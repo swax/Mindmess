@@ -1,4 +1,4 @@
-import gptModels, { GPTModel } from "@/utils/gptModels";
+import gptModels, { GptModelName } from "@/utils/gptModels";
 import { tabInput } from "@/utils/textEditing";
 import useLocalStorageSsr from "@/utils/useLocalStorageSsr";
 import PersonIcon from "@mui/icons-material/Person";
@@ -6,9 +6,6 @@ import SmartToyIcon from "@mui/icons-material/SmartToy";
 import {
   Box,
   Button,
-  Chip,
-  Menu,
-  MenuItem,
   Paper,
   Stack,
   Tab,
@@ -23,6 +20,7 @@ import { commandAction } from "../actions/command-action";
 import { mergeAction } from "../actions/merge-action";
 import { questionAction } from "../actions/question-action";
 import { FocusType, OutputTabType } from "../page";
+import ModelSelection from "./ModelSelection";
 import NoteField from "./NoteField";
 
 type InputTabType = "merge" | "command" | "question";
@@ -62,9 +60,8 @@ export default function InputSection({
     OpenAI.Chat.Completions.ChatCompletionMessage[]
   >([]);
 
-  const [gptModel, setGptModel] = useState<GPTModel>(gptModels[0]);
-  const [modelMenuAnchorEl, setModelMenuAnchorEl] = useState<HTMLDivElement>();
-  const modelMenuOpen = Boolean(modelMenuAnchorEl);
+  const [gptModelName, setGptModelName, gptModelLoaded] =
+    useLocalStorageSsr<GptModelName>("gptModel", "gpt-4");
 
   const [usageReport, setUsageReport] = useState<string>("");
   const [totalCost, setTotalCost] = useState<number>(0);
@@ -91,6 +88,12 @@ export default function InputSection({
   }
 
   async function handleClick_runInput() {
+    const gptModel = gptModels.find((model) => model.name == gptModelName);
+    if (!gptModel) {
+      alert("Error: Model not found");
+      return;
+    }
+
     setLoading(true);
     setFocus("none");
 
@@ -99,11 +102,11 @@ export default function InputSection({
 
     const response =
       inputTab == "merge"
-        ? await mergeAction(input, existingNotes, gptModel.name)
+        ? await mergeAction(input, existingNotes, gptModelName)
         : inputTab == "command"
-        ? await commandAction(input, existingNotes, gptModel.name)
+        ? await commandAction(input, existingNotes, gptModelName)
         : inputTab == "question"
-        ? await questionAction(input, existingNotes, chatLog, gptModel.name)
+        ? await questionAction(input, existingNotes, chatLog, gptModelName)
         : undefined;
 
     // Check if this run was cancelled
@@ -150,6 +153,11 @@ export default function InputSection({
     value: InputTabType,
   ) {
     setInputTab(value);
+    setFocus("input");
+  }
+
+  function handleClick_clearChat() {
+    setChatLog([]);
     setFocus("input");
   }
 
@@ -201,6 +209,15 @@ export default function InputSection({
         inputRef={inputRef}
         minRows={3}
         onChange={(e) => setInput(e.target.value)}
+        placeholder={
+          inputTab == "merge"
+            ? "Merge in new information; automatically reorganizing and de-duplicating..."
+            : inputTab == "command"
+            ? "A command to change and update the current document..."
+            : inputTab == "question"
+            ? "Discuss your document with ChatGPT..."
+            : ""
+        }
         sx={{ marginTop: 1 }}
         value={input}
       />
@@ -225,53 +242,21 @@ export default function InputSection({
           </Button>
         )}
         {!loading && inputTab == "question" && chatLog.length > 0 && (
-          <Button onClick={() => setChatLog([])} variant="outlined">
+          <Button onClick={handleClick_clearChat} variant="outlined">
             Clear Chat
           </Button>
         )}
         {Boolean(stagedNote) && <Box>⬅️ Review Changes</Box>}
       </Stack>
-
-      {/* Model Selection */}
-      <Chip
-        label={"Using " + gptModel.description}
-        onClick={(e) => setModelMenuAnchorEl(e.currentTarget)}
-        size="small"
-        sx={{ marginTop: 2 }}
-      />
-      <Menu
-        anchorEl={modelMenuAnchorEl}
-        onClose={() => setModelMenuAnchorEl(undefined)}
-        open={modelMenuOpen}
-      >
-        {gptModels.map((model, index) => (
-          <MenuItem
-            key={index}
-            onClick={() => {
-              setGptModel(model);
-              setModelMenuAnchorEl(undefined);
-            }}
-          >
-            <Stack>
-              <Box>{model.description}</Box>
-              <Box sx={{ fontSize: 12, color: "text.secondary" }}>
-                Input ${model.costPer1kInput}, Output ${model.costPer1kOutput}{" "}
-                per 1k tokens
-              </Box>
-            </Stack>
-          </MenuItem>
-        ))}
-      </Menu>
-      {/* Usage Report */}
-      {totalCost > 0 && (
-        <Box sx={{ marginTop: 2 }}>
-          <Box sx={{ fontSize: 12, color: "text.secondary" }}>
-            {usageReport}
-          </Box>
-          <Box sx={{ fontSize: 12, color: "text.secondary" }}>
-            Running Total Cost: ${totalCost.toFixed(4)}
-          </Box>
-        </Box>
+      {gptModelLoaded && (
+        <ModelSelection
+          {...{
+            gptModelName,
+            setGptModelName,
+            totalCost,
+            usageReport,
+          }}
+        />
       )}
     </>
   );

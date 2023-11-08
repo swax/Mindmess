@@ -34,7 +34,7 @@ export default function Home() {
     {
       outputFormat: "standard",
       spellCheck: false,
-    }
+    },
   );
 
   useEffect(() => {

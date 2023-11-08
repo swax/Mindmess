@@ -1,6 +1,7 @@
 import { localStorageApiKeyKey } from "@/utils/apiKey";
 import useLocalStorageSsr from "@/utils/useLocalStorageSsr";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import KeyIcon from "@mui/icons-material/Key";
 import {
   AppBar,
   Box,
@@ -55,6 +56,7 @@ export default function AppHeader() {
   function handleClick_clearApiKey() {
     setApiKey("");
     setNewApiKey("");
+    handleClose_menu();
   }
 
   // Rendering
@@ -70,16 +72,21 @@ export default function AppHeader() {
           Mindmess
         </Typography>
         <div>
-          {apiKeyLoaded && (
-            <Button
-              color={apiKey ? "inherit" : "warning"}
-              onClick={handleClick_openMenu}
-              size="small"
-              variant="outlined"
-            >
-              {!apiKey ? "Set" : ""} API Key
-            </Button>
-          )}
+          {apiKeyLoaded &&
+            (apiKey ? (
+              <IconButton onClick={handleClick_openMenu}>
+                <KeyIcon />
+              </IconButton>
+            ) : (
+              <Button
+                color="warning"
+                onClick={handleClick_openMenu}
+                size="small"
+                variant="outlined"
+              >
+                Set API Key
+              </Button>
+            ))}
           <Popover
             anchorEl={menuAnchorEl}
             anchorOrigin={{
