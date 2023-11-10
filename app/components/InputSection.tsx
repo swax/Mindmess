@@ -211,7 +211,7 @@ export default function InputSection({
         onChange={(e) => setInput(e.target.value)}
         placeholder={
           inputTab == "merge"
-            ? "Merge in new information; automatically reorganizing and de-duplicating..."
+            ? "Merge in new information while reorganizing and de-duplicating..."
             : inputTab == "command"
             ? "A command to change and update the current document..."
             : inputTab == "question"

@@ -65,9 +65,9 @@ export default function OutputSection({
           onChange={handleChange_output}
           placeholder={
             currentNoteLoaded
-              ? `Write your document here and use the tools on the right to work with it. 
+              ? `Write or paste your document here and use the tools on the right to work with it. 
 
-After a command runs, verify you want to keep the change by clicking Accept or Reject.
+After a command runs, verify you want to keep the change by clicking Accept.
 
 Set your OpenAI API key in the upper-right as this app stores all data locally, and talks with OpenAI directly`
               : ""
