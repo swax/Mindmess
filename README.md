@@ -1,6 +1,10 @@
 ## Mindmess
 
-Your mind is a mess. Get your notes organized with ChatGPT.
+I built this tool to help me combine various notes I have scattered around. Also I used 
+it to interatively design a database schema. Various other things as well. OpenAI does not have
+a single document interface where you can iterate and approve revisions (yet).
+
+I hope you find this tool as useful as I have!
 
 ### Use Cases
 
