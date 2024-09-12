@@ -55,8 +55,8 @@ export default function ModelSelection({
               <Stack>
                 <Box>{model.description}</Box>
                 <Box sx={{ fontSize: 12, color: "text.secondary" }}>
-                  Input ${model.costPer1kInput}, Output ${model.costPer1kOutput}{" "}
-                  per 1k tokens
+                  Input ${model.costPer1MInput}, Output ${model.costPer1MOutput}{" "}
+                  per 1M tokens
                 </Box>
               </Stack>
             </Stack>

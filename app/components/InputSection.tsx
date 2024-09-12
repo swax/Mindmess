@@ -57,11 +57,11 @@ export default function InputSection({
   );
 
   const [chatLog, setChatLog] = useState<
-    OpenAI.Chat.Completions.ChatCompletionMessage[]
+    OpenAI.Chat.Completions.ChatCompletionMessageParam[]
   >([]);
 
   const [gptModelName, setGptModelName, gptModelLoaded] =
-    useLocalStorageSsr<GptModelName>("gptModel", "gpt-4");
+    useLocalStorageSsr<GptModelName>("gptModel", "gpt-4o");
 
   const [usageReport, setUsageReport] = useState<string>("");
   const [totalCost, setTotalCost] = useState<number>(0);
@@ -122,8 +122,8 @@ export default function InputSection({
     }
 
     let cost =
-      (response.inputTokens * gptModel.costPer1kInput) / 1000 +
-      (response.outputTokens * gptModel.costPer1kOutput) / 1000;
+      (response.inputTokens * gptModel.costPer1MInput) / 1_000_000 +
+      (response.outputTokens * gptModel.costPer1MOutput) / 1_000_000;
     setUsageReport(
       `Last Run: Input ${response.inputTokens} tokens, output ${
         response.outputTokens
@@ -191,7 +191,7 @@ export default function InputSection({
                       whiteSpace: "pre-wrap",
                     }}
                   >
-                    {message.content}
+                    {message.content?.toString()}
                   </pre>
                 </TableCell>
               </TableRow>

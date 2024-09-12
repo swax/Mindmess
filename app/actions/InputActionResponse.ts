@@ -2,7 +2,7 @@ import OpenAI from "openai";
 
 export interface InputActionResponse {
   newNote: string;
-  chatLog: OpenAI.Chat.Completions.ChatCompletionMessage[];
+  chatLog: OpenAI.Chat.Completions.ChatCompletionMessageParam[];
   error: string;
   inputTokens: number;
   outputTokens: number;
