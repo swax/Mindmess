@@ -1,11 +1,11 @@
 //"use server";
 
 import { getApiKeyOrThrow } from "@/utils/apiKey";
-import { GptModelName } from "@/utils/gptModels";
+import { getSystemMessage, GptModelName } from "@/utils/gptModels";
 import OpenAI from "openai";
 import {
-  InputActionResponse,
   initInputActionResponse,
+  InputActionResponse,
   setTokensUsed,
 } from "./InputActionResponse";
 
@@ -27,14 +27,13 @@ export async function questionAction(
 
     const noteMsg = `Existing Notes:\n${existingNotes}`;
 
-    const questionAnswer: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-      { role: "user", content: question },
-    ];
+    const questionAnswer: OpenAI.Chat.Completions.ChatCompletionMessageParam[] =
+      [{ role: "user", content: question }];
 
     const chatCompletion = await openai.chat.completions.create({
       model: modelName,
       messages: [
-        { role: "system", content: systemMessage },
+        getSystemMessage(modelName, systemMessage),
         { role: "user", content: noteMsg },
         ...messageLog,
         ...questionAnswer,

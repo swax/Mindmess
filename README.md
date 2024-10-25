@@ -1,6 +1,6 @@
 ## Mindmess
 
-I built this tool to help me combine various notes I have scattered around. Also I used 
+I built this tool to help me combine various notes I have scattered around. Also I used
 it to interatively design a database schema. Various other things as well. OpenAI does not have
 a single document interface where you can iterate and approve revisions (yet).
 
@@ -29,16 +29,16 @@ I hope you find this tool as useful as I have!
 ### Tech stack
 
 - OpenAI API
-- Next.js
+- Next.js 15
 - React
 - TypeScript
-- MUI
+- MUI 6
 
 ### Running Locally
 
 - `git clone https://github.com/swax/mindmess.git`
 - `npm install`
-- `npm run dev`
+- `npm run dev --turbo`
 
 ### Running Remotely
 
