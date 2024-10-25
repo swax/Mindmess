@@ -10,6 +10,7 @@ import {
   Stack,
   Tab,
   Table,
+  TableBody,
   TableCell,
   TableRow,
   Tabs,
@@ -104,10 +105,10 @@ export default function InputSection({
       inputTab == "merge"
         ? await mergeAction(input, existingNotes, gptModelName)
         : inputTab == "command"
-        ? await commandAction(input, existingNotes, gptModelName)
-        : inputTab == "question"
-        ? await questionAction(input, existingNotes, chatLog, gptModelName)
-        : undefined;
+          ? await commandAction(input, existingNotes, gptModelName)
+          : inputTab == "question"
+            ? await questionAction(input, existingNotes, chatLog, gptModelName)
+            : undefined;
 
     // Check if this run was cancelled
     if (!response || runNumberCheck != runNumber.current) {
@@ -172,30 +173,32 @@ export default function InputSection({
       {inputTab == "question" && Boolean(chatLog.length) && (
         <Paper>
           <Table sx={{ marginTop: 1 }}>
-            {chatLog.map((message, i) => (
-              <TableRow key={i}>
-                <TableCell sx={{ width: 24, verticalAlign: "top" }}>
-                  {message.role == "assistant" ? (
-                    <SmartToyIcon />
-                  ) : (
-                    <PersonIcon />
-                  )}
-                </TableCell>
-                <TableCell sx={{ sverticalAlign: "top" }}>
-                  <pre
-                    style={{
-                      fontFamily: "Calibri, sans-serif",
-                      fontSize: 14,
-                      lineHeight: 1.3,
-                      margin: 0,
-                      whiteSpace: "pre-wrap",
-                    }}
-                  >
-                    {message.content?.toString()}
-                  </pre>
-                </TableCell>
-              </TableRow>
-            ))}
+            <TableBody>
+              {chatLog.map((message, i) => (
+                <TableRow key={i}>
+                  <TableCell sx={{ width: 24, verticalAlign: "top" }}>
+                    {message.role == "assistant" ? (
+                      <SmartToyIcon />
+                    ) : (
+                      <PersonIcon />
+                    )}
+                  </TableCell>
+                  <TableCell sx={{ sverticalAlign: "top" }}>
+                    <pre
+                      style={{
+                        fontFamily: "Calibri, sans-serif",
+                        fontSize: 14,
+                        lineHeight: 1.3,
+                        margin: 0,
+                        whiteSpace: "pre-wrap",
+                      }}
+                    >
+                      {message.content?.toString()}
+                    </pre>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
           </Table>
         </Paper>
       )}
@@ -213,10 +216,10 @@ export default function InputSection({
           inputTab == "merge"
             ? "Merge in new information while reorganizing and de-duplicating..."
             : inputTab == "command"
-            ? "A command to change and update the current document..."
-            : inputTab == "question"
-            ? "Discuss your document with ChatGPT..."
-            : ""
+              ? "A command to change and update the current document..."
+              : inputTab == "question"
+                ? "Discuss your document with ChatGPT..."
+                : ""
         }
         sx={{ marginTop: 1 }}
         value={input}

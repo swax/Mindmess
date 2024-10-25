@@ -1,7 +1,7 @@
 "use client";
 
 import useLocalStorageSsr from "@/utils/useLocalStorageSsr";
-import { Grid, LinearProgress } from "@mui/material";
+import { Grid2, LinearProgress } from "@mui/material";
 import { useEffect, useState } from "react";
 import AppHeader from "./components/AppHeader";
 import InputSection from "./components/InputSection";
@@ -63,8 +63,8 @@ export default function Home() {
     <>
       <AppHeader />
       {loading && <LinearProgress />}
-      <Grid container padding={1} spacing={2}>
-        <Grid item md={7} sm={12} xs={12}>
+      <Grid2 container padding={1} spacing={2}>
+        <Grid2 size={{ md: 7, sm: 12, xs: 12 }}>
           <OutputToolbar
             {...{
               focus,
@@ -90,8 +90,8 @@ export default function Home() {
               stagedNote,
             }}
           />
-        </Grid>
-        <Grid item md={5} sm={12} xs={12}>
+        </Grid2>
+        <Grid2 size={{ md: 5, sm: 12, xs: 12 }}>
           <InputSection
             {...{
               currentNote,
@@ -106,8 +106,8 @@ export default function Home() {
               stagedNote,
             }}
           />
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
     </>
   );
 }

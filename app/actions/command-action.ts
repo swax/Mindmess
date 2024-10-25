@@ -1,11 +1,11 @@
 //"use server";
 
 import { getApiKeyOrThrow } from "@/utils/apiKey";
-import { GptModelName } from "@/utils/gptModels";
+import { getSystemMessage, GptModelName } from "@/utils/gptModels";
 import OpenAI from "openai";
 import {
-  InputActionResponse,
   initInputActionResponse,
+  InputActionResponse,
   setTokensUsed,
 } from "./InputActionResponse";
 
@@ -31,7 +31,7 @@ export async function commandAction(
     const chatCompletion = await openai.chat.completions.create({
       model: modelName,
       messages: [
-        { role: "system", content: systemMessage },
+        getSystemMessage(modelName, systemMessage),
         { role: "user", content: noteMsg },
         { role: "user", content: commandMsg },
       ],
