@@ -18,13 +18,15 @@ import {
 import OpenAI from "openai";
 import { useEffect, useRef, useState } from "react";
 import { commandAction } from "../actions/command-action";
+import { ParrotCheckResult } from "../actions/InputActionResponse";
 import { mergeAction } from "../actions/merge-action";
+import { parrotCheckAction } from "../actions/parrot-check-action";
 import { questionAction } from "../actions/question-action";
 import { FocusType, OutputTabType } from "../page";
 import ModelSelection from "./ModelSelection";
 import NoteField from "./NoteField";
 
-type InputTabType = "merge" | "command" | "question";
+type InputTabType = "merge" | "command" | "question" | "parrotCheck";
 
 interface InputSectionProps {
   currentNote?: string;
@@ -67,6 +69,8 @@ export default function InputSection({
   const [usageReport, setUsageReport] = useState<string>("");
   const [totalCost, setTotalCost] = useState<number>(0);
 
+  const [parrotReport, setParrotReport] = useState<ParrotCheckResult[]>([]);
+
   const runNumber = useRef(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -108,7 +112,9 @@ export default function InputSection({
           ? await commandAction(input, existingNotes, gptModelName)
           : inputTab == "question"
             ? await questionAction(input, existingNotes, chatLog, gptModelName)
-            : undefined;
+            : inputTab == "parrotCheck"
+              ? await parrotCheckAction(input, existingNotes, gptModelName)
+              : undefined;
 
     // Check if this run was cancelled
     if (!response || runNumberCheck != runNumber.current) {
@@ -132,7 +138,9 @@ export default function InputSection({
     );
     setTotalCost(totalCost + cost);
 
-    if (inputTab == "question") {
+    if (inputTab == "parrotCheck") {
+      setParrotReport(response.parrotReport);
+    } else if (inputTab == "question") {
       setChatLog([...chatLog, ...response.chatLog]);
       setInput("");
       setFocus("input");
@@ -169,6 +177,7 @@ export default function InputSection({
         <Tab label="Merge" value="merge" />
         <Tab label="Command" value="command" />
         <Tab label="Question" value="question" />
+        <Tab label="Parrot Check" value="parrotCheck" />
       </Tabs>
       {inputTab == "question" && Boolean(chatLog.length) && (
         <Paper>
@@ -205,10 +214,7 @@ export default function InputSection({
 
       <NoteField
         disabled={loading || Boolean(stagedNote)}
-        inputProps={{
-          "aria-label": "Input",
-          onKeyDown: handleKeyDown_input,
-        }}
+        inputProps={{ "aria-label": "Input", onKeyDown: handleKeyDown_input }}
         inputRef={inputRef}
         minRows={3}
         onChange={(e) => setInput(e.target.value)}
@@ -219,7 +225,9 @@ export default function InputSection({
               ? "A command to change and update the current document..."
               : inputTab == "question"
                 ? "Discuss your document with ChatGPT..."
-                : ""
+                : inputTab == "parrotCheck"
+                  ? "Enter the context on the left and your comment here to find out if you are a parrot..."
+                  : ""
         }
         sx={{ marginTop: 1 }}
         value={input}
@@ -253,13 +261,40 @@ export default function InputSection({
       </Stack>
       {gptModelLoaded && (
         <ModelSelection
-          {...{
-            gptModelName,
-            setGptModelName,
-            totalCost,
-            usageReport,
-          }}
+          {...{ gptModelName, setGptModelName, totalCost, usageReport }}
         />
+      )}
+      {inputTab == "parrotCheck" && (
+        <div>
+          {parrotReport.map((pr, i) => (
+            <span
+              key={i}
+              style={{
+                color:
+                  pr.probability > 90
+                    ? "pink"
+                    : pr.probability > 70
+                      ? "cyan"
+                      : pr.probability > 50
+                        ? "limegreen"
+                        : pr.probability > 30
+                          ? "yellow"
+                          : pr.probability > 0
+                            ? "orange"
+                            : "red",
+              }}
+              title={
+                (pr.probability
+                  ? `Matched: "${pr.match}" with probability ${pr.probability.toFixed(0)}%`
+                  : `Not predicted`) +
+                `\nWord Predictions:\n${pr.other_words.map((ow) => `${ow.word}: ${ow.probability.toFixed(0)}%`).join("\n")}` +
+                `\nText Prediction: "${pr.predictedText}"`
+              }
+            >
+              {pr.word}{" "}
+            </span>
+          ))}
+        </div>
       )}
     </>
   );
