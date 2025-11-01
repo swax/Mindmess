@@ -62,7 +62,7 @@ export default function InputSection({
   >([]);
 
   const [gptModelName, setGptModelName, gptModelLoaded] =
-    useLocalStorageSsr<GptModelName>("gptModel", "gpt-4o");
+    useLocalStorageSsr<GptModelName>("gptModel", "gpt-5");
 
   const [usageReport, setUsageReport] = useState<string>("");
   const [totalCost, setTotalCost] = useState<number>(0);

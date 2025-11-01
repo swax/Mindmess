@@ -33,7 +33,7 @@ export async function mergeAction(
     const chatCompletion = await openai.chat.completions.create({
       model: modelName,
       messages: [
-        getSystemMessage(modelName, systemMessage),
+        getSystemMessage(systemMessage),
         { role: "user", content: noteMsg },
         { role: "user", content: inputMsg },
       ],
