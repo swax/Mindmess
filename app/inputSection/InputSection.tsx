@@ -1,30 +1,13 @@
 import gptModels, { GptModelName } from "@/utils/gptModels";
-import { tabInput } from "@/utils/textEditing";
 import useLocalStorageSsr from "@/utils/useLocalStorageSsr";
-import PersonIcon from "@mui/icons-material/Person";
-import SmartToyIcon from "@mui/icons-material/SmartToy";
-import {
-  Box,
-  Button,
-  Paper,
-  Stack,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  Tabs,
-} from "@mui/material";
-import OpenAI from "openai";
+import { Tab, Tabs } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
-import { commandAction } from "../actions/command-action";
-import { ParrotCheckResult } from "../actions/InputActionResponse";
-import { mergeAction } from "../actions/merge-action";
-import { parrotCheckAction } from "../actions/parrot-check-action";
-import { questionAction } from "../actions/question-action";
 import { FocusType, OutputTabType } from "../page";
+import CommandPanel from "./CommandPanel";
+import MergePanel from "./MergePanel";
 import ModelSelection from "./ModelSelection";
-import NoteField from "../components/NoteField";
+import ParrotCheckPanel from "./ParrotCheckPanel";
+import QuestionPanel from "./QuestionPanel";
 
 type InputTabType = "merge" | "command" | "question" | "parrotCheck";
 
@@ -59,19 +42,12 @@ export default function InputSection({
     "merge",
   );
 
-  const [chatLog, setChatLog] = useState<
-    OpenAI.Chat.Completions.ChatCompletionMessageParam[]
-  >([]);
-
   const [gptModelName, setGptModelName, gptModelLoaded] =
     useLocalStorageSsr<GptModelName>("gptModel", "gpt-5");
 
   const [usageReport, setUsageReport] = useState<string>("");
   const [totalCost, setTotalCost] = useState<number>(0);
 
-  const [parrotReport, setParrotReport] = useState<ParrotCheckResult[]>([]);
-
-  const runNumber = useRef(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -82,79 +58,17 @@ export default function InputSection({
   }, [focus]);
 
   // Event Handlers
-  function handleKeyDown_input(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Tab" && e.shiftKey) {
-      e.preventDefault();
-      tabInput(e.currentTarget);
-    } else if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleClick_runInput();
-    }
-  }
-
-  async function handleClick_runInput() {
+  function updateUsageReport(inputTokens: number, outputTokens: number) {
     const gptModel = gptModels.find((model) => model.name == gptModelName);
-    if (!gptModel) {
-      alert("Error: Model not found");
-      return;
-    }
-
-    setLoading(true);
-    setFocus("none");
-
-    const runNumberCheck = runNumber.current;
-    const existingNotes = currentNote || "";
-
-    const response =
-      inputTab == "merge"
-        ? await mergeAction(input, existingNotes, gptModelName)
-        : inputTab == "command"
-          ? await commandAction(input, existingNotes, gptModelName)
-          : inputTab == "question"
-            ? await questionAction(input, existingNotes, chatLog, gptModelName)
-            : inputTab == "parrotCheck"
-              ? await parrotCheckAction(input, existingNotes, gptModelName)
-              : undefined;
-
-    // Check if this run was cancelled
-    if (!response || runNumberCheck != runNumber.current) {
-      return;
-    }
-
-    setLoading(false);
-
-    if (response.error) {
-      alert(response.error);
-      return;
-    }
+    if (!gptModel) return;
 
     let cost =
-      (response.inputTokens * gptModel.costPer1MInput) / 1_000_000 +
-      (response.outputTokens * gptModel.costPer1MOutput) / 1_000_000;
+      (inputTokens * gptModel.costPer1MInput) / 1_000_000 +
+      (outputTokens * gptModel.costPer1MOutput) / 1_000_000;
     setUsageReport(
-      `Last Run: Input ${response.inputTokens} tokens, output ${
-        response.outputTokens
-      } tokens. Cost $${cost.toFixed(4)}`,
+      `Last Run: Input ${inputTokens} tokens, output ${outputTokens} tokens. Cost $${cost.toFixed(4)}`,
     );
     setTotalCost(totalCost + cost);
-
-    if (inputTab == "parrotCheck") {
-      setParrotReport(response.parrotReport);
-    } else if (inputTab == "question") {
-      setChatLog([...chatLog, ...response.chatLog]);
-      setInput("");
-      setFocus("input");
-    } else {
-      setStagedNote(response.newNote);
-      setFocus("accept");
-      setOutputTab("staging");
-    }
-  }
-
-  function handleClick_cancelRunInput() {
-    setLoading(false);
-    setFocus("input");
-    runNumber.current++;
   }
 
   function handleChange_inputTab(
@@ -162,11 +76,6 @@ export default function InputSection({
     value: InputTabType,
   ) {
     setInputTab(value);
-    setFocus("input");
-  }
-
-  function handleClick_clearChat() {
-    setChatLog([]);
     setFocus("input");
   }
 
@@ -179,122 +88,69 @@ export default function InputSection({
         <Tab label="Question" value="question" />
         <Tab label="Parrot Check" value="parrotCheck" />
       </Tabs>
-      {inputTab == "question" && Boolean(chatLog.length) && (
-        <Paper>
-          <Table sx={{ marginTop: 1 }}>
-            <TableBody>
-              {chatLog.map((message, i) => (
-                <TableRow key={i}>
-                  <TableCell sx={{ width: 24, verticalAlign: "top" }}>
-                    {message.role == "assistant" ? (
-                      <SmartToyIcon />
-                    ) : (
-                      <PersonIcon />
-                    )}
-                  </TableCell>
-                  <TableCell sx={{ sverticalAlign: "top" }}>
-                    <pre
-                      style={{
-                        fontFamily: "Calibri, sans-serif",
-                        fontSize: 14,
-                        lineHeight: 1.3,
-                        margin: 0,
-                        whiteSpace: "pre-wrap",
-                      }}
-                    >
-                      {message.content?.toString()}
-                    </pre>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Paper>
+      {inputTab === "merge" && (
+        <MergePanel
+          input={input}
+          currentNote={currentNote}
+          gptModelName={gptModelName}
+          stagedNote={stagedNote}
+          loading={loading}
+          inputRef={inputRef}
+          setInput={setInput}
+          setFocus={setFocus}
+          setLoading={setLoading}
+          setStagedNote={setStagedNote}
+          setOutputTab={setOutputTab}
+          updateUsageReport={updateUsageReport}
+        />
       )}
-
-      <NoteField
-        disabled={loading || Boolean(stagedNote)}
-        inputProps={{ "aria-label": "Input", onKeyDown: handleKeyDown_input }}
-        inputRef={inputRef}
-        minRows={3}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder={
-          inputTab == "merge"
-            ? "Merge in new information while reorganizing and de-duplicating..."
-            : inputTab == "command"
-              ? "A command to change and update the current document..."
-              : inputTab == "question"
-                ? "Discuss your document with ChatGPT..."
-                : inputTab == "parrotCheck"
-                  ? "Enter the context on the left and your comment here to find out if you are a parrot..."
-                  : ""
-        }
-        sx={{ marginTop: 1 }}
-        value={input}
-      />
-      {/* Run Buttons */}
-      <Stack alignItems="center" direction="row" spacing={1}>
-        {!Boolean(stagedNote) && (
-          <Button
-            disabled={loading || !input}
-            onClick={handleClick_runInput}
-            variant="outlined"
-          >
-            {loading ? "Working... " : "Run " + inputTab}
-          </Button>
-        )}
-        {loading && (
-          <Button
-            color="error"
-            onClick={handleClick_cancelRunInput}
-            variant="outlined"
-          >
-            Cancel
-          </Button>
-        )}
-        {!loading && inputTab == "question" && chatLog.length > 0 && (
-          <Button onClick={handleClick_clearChat} variant="outlined">
-            Clear Chat
-          </Button>
-        )}
-        {Boolean(stagedNote) && <Box>⬅️ Review Changes</Box>}
-      </Stack>
-      {gptModelLoaded && (
+      {inputTab === "command" && (
+        <CommandPanel
+          input={input}
+          currentNote={currentNote}
+          gptModelName={gptModelName}
+          stagedNote={stagedNote}
+          loading={loading}
+          inputRef={inputRef}
+          setInput={setInput}
+          setFocus={setFocus}
+          setLoading={setLoading}
+          setStagedNote={setStagedNote}
+          setOutputTab={setOutputTab}
+          updateUsageReport={updateUsageReport}
+        />
+      )}
+      {inputTab === "question" && (
+        <QuestionPanel
+          input={input}
+          currentNote={currentNote}
+          gptModelName={gptModelName}
+          loading={loading}
+          inputRef={inputRef}
+          setInput={setInput}
+          setFocus={setFocus}
+          setLoading={setLoading}
+          updateUsageReport={updateUsageReport}
+        />
+      )}
+      {inputTab === "parrotCheck" && (
+        <ParrotCheckPanel
+          input={input}
+          currentNote={currentNote}
+          gptModelName={gptModelName}
+          stagedNote={stagedNote}
+          loading={loading}
+          inputRef={inputRef}
+          setInput={setInput}
+          setFocus={setFocus}
+          setLoading={setLoading}
+          updateUsageReport={updateUsageReport}
+        />
+      )}
+      {gptModelLoaded && inputTab !== "parrotCheck" && (
         <ModelSelection
           {...{ gptModelName, setGptModelName, totalCost, usageReport }}
         />
-      )}
-      {inputTab == "parrotCheck" && (
-        <div>
-          {parrotReport.map((pr, i) => (
-            <span
-              key={i}
-              style={{
-                color:
-                  pr.probability > 90
-                    ? "pink"
-                    : pr.probability > 70
-                      ? "cyan"
-                      : pr.probability > 50
-                        ? "limegreen"
-                        : pr.probability > 30
-                          ? "yellow"
-                          : pr.probability > 0
-                            ? "orange"
-                            : "red",
-              }}
-              title={
-                (pr.probability
-                  ? `Matched: "${pr.match}" with probability ${pr.probability.toFixed(0)}%`
-                  : `Not predicted`) +
-                `\nWord Predictions:\n${pr.other_words.map((ow) => `${ow.word}: ${ow.probability.toFixed(0)}%`).join("\n")}` +
-                `\nText Prediction: "${pr.predictedText}"`
-              }
-            >
-              {pr.word}{" "}
-            </span>
-          ))}
-        </div>
       )}
     </>
   );
