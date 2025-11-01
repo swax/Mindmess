@@ -1,4 +1,4 @@
-export type GptModelName = "gpt-4o" | "gpt-4o-mini" | "o1-preview" | "o1-mini";
+export type GptModelName = "gpt-5" | "gpt-5-mini" | "gpt-5-nano";
 
 export type GptModel = {
   name: GptModelName;
@@ -10,46 +10,38 @@ export type GptModel = {
 
 const gptModels: GptModel[] = [
   {
-    name: "gpt-4o",
-    description: "GPT-4o 128k",
-    maxTokens: 128_000,
-    costPer1MInput: 2.5,
+    name: "gpt-5",
+    description: "GPT-5 400k",
+    maxTokens: 400_000,
+    costPer1MInput: 1.25,
     costPer1MOutput: 10,
   },
   {
-    name: "gpt-4o-mini",
-    description: "GPT-4o mini 128k",
-    maxTokens: 128_000,
-    costPer1MInput: 0.15,
-    costPer1MOutput: 0.6,
+    name: "gpt-5-mini",
+    description: "GPT-5 mini 400k",
+    maxTokens: 400_000,
+    costPer1MInput: 0.25,
+    costPer1MOutput: 2.0,
   },
   {
-    name: "o1-preview",
-    description: "GPT-o1 preview 128k",
-    maxTokens: 128_000,
-    costPer1MInput: 15,
-    costPer1MOutput: 60,
-  },
-  {
-    name: "o1-mini",
-    description: "GPT-o1 mini 128k",
-    maxTokens: 128_000,
-    costPer1MInput: 3,
-    costPer1MOutput: 12,
+    name: "gpt-5-nano",
+    description: "GPT-5 nano 400k",
+    maxTokens: 400_000,
+    costPer1MInput: 0.05,
+    costPer1MOutput: 0.4,
   },
 ];
 
 export default gptModels;
 
 export function getSystemMessage(
-  modelName: GptModelName,
   message: string,
 ): {
   role: "system" | "user";
   content: string;
 } {
   return {
-    role: modelName.startsWith("o1") ? "user" : "system",
-    content: modelName.startsWith("o1") ? `Instructions:\n${message}` : message,
+    role: "system",
+    content: message,
   };
 }

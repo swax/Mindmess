@@ -31,7 +31,7 @@ export async function commandAction(
     const chatCompletion = await openai.chat.completions.create({
       model: modelName,
       messages: [
-        getSystemMessage(modelName, systemMessage),
+        getSystemMessage(systemMessage),
         { role: "user", content: noteMsg },
         { role: "user", content: commandMsg },
       ],

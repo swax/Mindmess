@@ -33,7 +33,7 @@ export async function questionAction(
     const chatCompletion = await openai.chat.completions.create({
       model: modelName,
       messages: [
-        getSystemMessage(modelName, systemMessage),
+        getSystemMessage(systemMessage),
         { role: "user", content: noteMsg },
         ...messageLog,
         ...questionAnswer,
