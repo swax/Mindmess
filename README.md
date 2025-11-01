@@ -19,6 +19,7 @@ I hope you find this tool as useful as I have!
 - **Merge:** Merge in a block on notes with the document. AI figures how how to merge the notes in.
 - **Command:** Ask the AI to perform an operation on the document. For example, "delete the last paragraph".
 - **Chat:** Chat with the AI about the document. For example, "what is the last paragraph about?".
+- **Parrot Check:** Investigate the predictability of words given the preceding context.
 
 ### Features
 

@@ -1,11 +1,20 @@
 import OpenAI from "openai";
 
+export interface ParrotCheckResult {
+  word: string;
+  probability: number;
+  match: string;
+  predictedText: string;
+  other_words: {word: string; probability: number}[];
+}
+
 export interface InputActionResponse {
   newNote: string;
   chatLog: OpenAI.Chat.Completions.ChatCompletionMessageParam[];
   error: string;
   inputTokens: number;
   outputTokens: number;
+  parrotReport: ParrotCheckResult[];
 }
 
 export function initInputActionResponse(): InputActionResponse {
@@ -15,6 +24,7 @@ export function initInputActionResponse(): InputActionResponse {
     error: "",
     inputTokens: 0,
     outputTokens: 0,
+    parrotReport: [],
   };
 }
 
