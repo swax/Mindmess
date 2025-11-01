@@ -24,7 +24,7 @@ import { parrotCheckAction } from "../actions/parrot-check-action";
 import { questionAction } from "../actions/question-action";
 import { FocusType, OutputTabType } from "../page";
 import ModelSelection from "./ModelSelection";
-import NoteField from "./NoteField";
+import NoteField from "../components/NoteField";
 
 type InputTabType = "merge" | "command" | "question" | "parrotCheck";
 

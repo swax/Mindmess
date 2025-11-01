@@ -3,7 +3,7 @@ import { Box } from "@mui/material";
 import ReactDiffViewer from "react-diff-viewer-continued";
 import Markdown from "react-markdown";
 import { MindmessSettings, OutputTabType } from "../page";
-import NoteField from "./NoteField";
+import NoteField from "../components/NoteField";
 
 interface OutputSectionProps {
   currentNote?: string;

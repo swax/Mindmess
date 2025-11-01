@@ -4,9 +4,9 @@ import useLocalStorageSsr from "@/utils/useLocalStorageSsr";
 import { Grid, LinearProgress } from "@mui/material";
 import { useEffect, useState } from "react";
 import AppHeader from "./components/AppHeader";
-import InputSection from "./components/InputSection";
-import OutputSection from "./components/OutputSection";
-import OutputToolbar from "./components/OutputToolbar";
+import InputSection from "./inputSection/InputSection";
+import OutputSection from "./outputSection/OutputSection";
+import OutputToolbar from "./outputSection/OutputToolbar";
 
 export type FocusType = "accept" | "input" | "none";
 export type OutputTabType = "current" | "staging" | "diff";
