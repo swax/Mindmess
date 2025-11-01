@@ -1,11 +1,11 @@
 import gptModels, { GptModelName } from "@/utils/gptModels";
 import { tabInput } from "@/utils/textEditing";
-import { Box, Button, Stack } from "@mui/material";
-import { useState, useRef } from "react";
+import { Box, Button, Stack, Tooltip } from "@mui/material";
+import { useRef, useState } from "react";
 import { ParrotCheckResult } from "../actions/InputActionResponse";
 import { parrotCheckAction } from "../actions/parrot-check-action";
-import { FocusType } from "../page";
 import NoteField from "../components/NoteField";
+import { FocusType } from "../page";
 
 interface ParrotCheckPanelProps {
   input: string;
@@ -57,8 +57,7 @@ export default function ParrotCheckPanel({
 
     const response = await parrotCheckAction(
       input,
-      existingNotes,
-      gptModelName,
+      existingNotes,  
     );
 
     // Check if this run was cancelled
@@ -91,7 +90,7 @@ export default function ParrotCheckPanel({
         inputRef={inputRef}
         minRows={3}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="Enter the context on the left and your comment here to find out if you are a parrot..."
+        placeholder="Enter the context on the left and text here to find out the predictability of each word in the text."
         sx={{ marginTop: 1 }}
         value={input}
       />
@@ -102,7 +101,7 @@ export default function ParrotCheckPanel({
             onClick={handleRunInput}
             variant="outlined"
           >
-            {loading ? "Working... " : "Run parrotCheck"}
+            {loading ? "Working... " : "Run Parrot Check"}
           </Button>
         )}
         {loading && (
@@ -116,34 +115,55 @@ export default function ParrotCheckPanel({
         )}
         {Boolean(stagedNote) && <Box>⬅️ Review Changes</Box>}
       </Stack>
+      <Box sx={{ fontSize: 12, marginTop: 1, color: "text.secondary" }}>
+        Careful as this will run an API call for every word in the sentence
+        using the gpt-3.5-turbo-instruct model.
+      </Box>
       <Box sx={{ marginTop: 2 }}>
         {parrotReport.map((pr, i) => (
-          <span
+          <Tooltip
             key={i}
-            style={{
-              color:
-                pr.probability > 90
-                  ? "pink"
-                  : pr.probability > 70
-                    ? "cyan"
-                    : pr.probability > 50
-                      ? "limegreen"
-                      : pr.probability > 30
-                        ? "yellow"
-                        : pr.probability > 0
-                          ? "orange"
-                          : "red",
-            }}
             title={
-              (pr.probability
-                ? `Matched: "${pr.match}" with probability ${pr.probability.toFixed(0)}%`
-                : `Not predicted`) +
-              `\nWord Predictions:\n${pr.other_words.map((ow) => `${ow.word}: ${ow.probability.toFixed(0)}%`).join("\n")}` +
-              `\nText Prediction: "${pr.predictedText}"`
+              <Box>
+                <Box>
+                  {pr.probability
+                    ? `Matched: "${pr.match}" with probability ${pr.probability.toFixed(0)}%`
+                    : "Not predicted"}
+                </Box>
+                <Box sx={{ marginTop: 1 }}>Word Predictions:</Box>
+                {pr.other_words.map((ow, j) => (
+                  <Box key={j} sx={{ marginLeft: 1 }}>
+                    {ow.word}: {ow.probability.toFixed(0)}%
+                  </Box>
+                ))}
+                <Box sx={{ marginTop: 1 }}>
+                  Text Prediction: &quot;{pr.predictedText}&quot;
+                </Box>
+              </Box>
             }
           >
-            {pr.word}{" "}
-          </span>
+            <Box
+              component="span"
+              sx={{
+                color:
+                  pr.probability > 90
+                    ? "pink"
+                    : pr.probability > 70
+                      ? "cyan"
+                      : pr.probability > 50
+                        ? "limegreen"
+                        : pr.probability > 30
+                          ? "yellow"
+                          : pr.probability > 0
+                            ? "orange"
+                            : "red",
+                cursor: "pointer",
+                "&:hover": { backgroundColor: "#555" },
+              }}
+            >
+              {pr.word}{" "}
+            </Box>
+          </Tooltip>
         ))}
       </Box>
     </>

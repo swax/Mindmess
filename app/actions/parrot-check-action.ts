@@ -13,7 +13,6 @@ const systemMessage = `Run the following question on the 'Existing Notes'.`;
 export async function parrotCheckAction(
   comment: string,
   context: string,
-  modelName: GptModelName,
 ): Promise<InputActionResponse> {
   let result = initInputActionResponse();
 
@@ -31,7 +30,7 @@ export async function parrotCheckAction(
 
       const completionResponse = await openai.completions.create({
         model: "gpt-3.5-turbo-instruct", // "gpt-3.5-turbo-instruct", //  'gpt-3.5-turbo-instruct' | 'davinci-002' | 'babbage-002'
-        prompt: `${context}\n\n${rebuildComment}`,
+        prompt: `${context} ${rebuildComment}`,
         logprobs: 5,
         max_tokens: 5,
       });
